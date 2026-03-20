@@ -2,6 +2,7 @@ package com.nicohoffmann.auftragserfassung.model;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 @Entity(
@@ -11,7 +12,8 @@ import androidx.room.PrimaryKey;
                 parentColumns = "id",
                 childColumns = "baustelleId",
                 onDelete = ForeignKey.SET_NULL
-        )
+        ),
+        indices = {@Index("baustelleId")}
 )
 
 public class Eintrag {
