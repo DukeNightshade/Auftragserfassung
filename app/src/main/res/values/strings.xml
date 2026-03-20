@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Auftragserfassung</string>
+    <string name="hint_name_pflichtfeld">Name (Pflichtfeld)</string>
+    <string name="hint_adresse_optional">Adresse (optional)</string>
+    <string name="dialog_titel_baustelle">Baustelle hinzufügen</string>
+    <string name="button_speichern">Speichern</string>
+    <string name="button_abbrechen">Abbrechen</string>
 </resources>
