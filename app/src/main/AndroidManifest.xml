@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".BaustellenActivity" />
+        <activity android:name=".NeuerEintragActivity" />
     </application>
 
 </manifest>

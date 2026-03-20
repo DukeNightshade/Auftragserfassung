@@ -5,4 +5,12 @@
     <string name="dialog_titel_baustelle">Baustelle hinzufügen</string>
     <string name="button_speichern">Speichern</string>
     <string name="button_abbrechen">Abbrechen</string>
+    <string name="label_datum">Datum</string>
+    <string name="label_von">Von</string>
+    <string name="label_bis">Bis</string>
+    <string name="label_baustelle">Baustelle</string>
+    <string name="label_beschreibung">Beschreibung</string>
+    <string name="placeholder_zeit">--:--</string>
+    <string name="label_pause">Pause: %d min</string>
+    <string name="fehler_zeit">Bitte Von- und Bis-Zeit angeben</string>
 </resources>
