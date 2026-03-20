@@ -9,11 +9,40 @@ import com.nicohoffmann.auftragserfassung.dao.EintragDao;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
 
+/**
+ * Zentrale Room-Datenbankklasse der Anwendung.
+ * Verwaltet alle DAOs und stellt eine Singleton-Instanz bereit.
+ * @author Nico Hoffmann
+ * @version 1.0
+ */
 @Database(entities = {Baustelle.class, Eintrag.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
+    // ====================================
+    // Static Variables
+    // ====================================
+
+    private static final String DATABASE_NAME = "auftragserfassung_db";
+
+    // ====================================
+    // Business Logic Methods
+    // ====================================
+
     public abstract BaustelleDao baustelleDao();
     public abstract EintragDao eintragDao();
+
+    // ====================================
+    // Utility Methods
+    // ====================================
+
+    public static AppDatabase getInstance(Context context) {
+        DatabaseHolder.init(context);
+        return DatabaseHolder.instance;
+    }
+
+    // ====================================
+    // Inner Classes
+    // ====================================
 
     private static class DatabaseHolder {
         private static AppDatabase instance;
@@ -23,14 +52,9 @@ public abstract class AppDatabase extends RoomDatabase {
                 instance = Room.databaseBuilder(
                         context.getApplicationContext(),
                         AppDatabase.class,
-                        "auftragserfassung_db"
+                        DATABASE_NAME
                 ).build();
             }
         }
-    }
-
-    public static AppDatabase getInstance(Context context) {
-        DatabaseHolder.init(context);
-        return DatabaseHolder.instance;
     }
 }

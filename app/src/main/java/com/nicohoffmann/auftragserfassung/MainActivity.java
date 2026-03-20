@@ -18,21 +18,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Hauptaktivität der Anwendung.
+ * Zeigt die Einträge der aktuellen Woche gruppiert nach Wochentagen an
+ * und ermöglicht die Suche nach Einträgen.
+ * @author Nico Hoffmann
+ * @version 1.0
+ */
 public class MainActivity extends AppCompatActivity {
 
+    // ====================================
+    // Static Variables
+    // ====================================
+
+    private static final int MAX_EINTRAEGE_PRO_TAG = 2;
+
+    // ====================================
+    // Instance Variables
+    // ====================================
+
     private EintraegeAdapter adapter;
-    private AppDatabase db;
     private List<Eintrag> alleEintraege = new ArrayList<>();
     private List<Baustelle> alleBaustellen = new ArrayList<>();
+
+    // ====================================
+    // Business Logic Methods
+    // ====================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = AppDatabase.getInstance(this);
+        AppDatabase db = AppDatabase.getInstance(this);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerViewEintraege);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -41,12 +62,12 @@ public class MainActivity extends AppCompatActivity {
 
         db.baustelleDao().getAlleBaustellen().observe(this, baustellen -> {
             alleBaustellen = baustellen;
-            aktualisiereliste(alleEintraege);
+            aktualisiereListe(alleEintraege);
         });
 
         db.eintragDao().getAlleEintraege().observe(this, eintraege -> {
             alleEintraege = eintraege;
-            aktualisiereliste(eintraege);
+            aktualisiereListe(eintraege);
         });
 
         FloatingActionButton fab = findViewById(R.id.fabNeuerEintrag);
@@ -62,26 +83,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
-                    aktualisiereliste(alleEintraege);
+                    aktualisiereListe(alleEintraege);
                 } else {
                     List<Eintrag> gefiltert = alleEintraege.stream()
-                            .filter(e -> e.beschreibung != null &&
-                                    e.beschreibung.toLowerCase().contains(newText.toLowerCase()))
+                            .filter(e -> e.getBeschreibung() != null &&
+                                    e.getBeschreibung().toLowerCase().contains(newText.toLowerCase()))
                             .collect(Collectors.toList());
-                    aktualisiereliste(gefiltert);
+                    aktualisiereListe(gefiltert);
                 }
                 return true;
             }
         });
     }
 
-    private void aktualisiereliste(List<Eintrag> eintraege) {
+    // ====================================
+    // Utility Methods
+    // ====================================
+
+    private void aktualisiereListe(List<Eintrag> eintraege) {
         List<EintraegeAdapter.ListItem> items = new ArrayList<>();
 
         Map<String, List<Eintrag>> gruppiertNachTag = eintraege.stream()
-                .collect(Collectors.groupingBy(e -> e.datum));
+                .collect(Collectors.groupingBy(Eintrag::getDatum));
 
-        // Aktuelle Woche Montag–Freitag
         LocalDate heute = LocalDate.now();
         LocalDate montag = heute.with(DayOfWeek.MONDAY);
 
@@ -91,22 +115,24 @@ public class MainActivity extends AppCompatActivity {
             String tagName = tag.getDayOfWeek()
                     .getDisplayName(TextStyle.FULL, Locale.GERMAN);
 
-            List<Eintrag> tagEintraege = gruppiertNachTag.getOrDefault(datum, new ArrayList<>());
+            List<Eintrag> tagEintraege = Objects.requireNonNullElse(
+                    gruppiertNachTag.get(datum), new ArrayList<>()
+            );
 
             items.add(new EintraegeAdapter.HeaderItem(tagName));
 
-            int anzahl = Math.min(tagEintraege.size(), 2);
+            int anzahl = Math.min(tagEintraege.size(), MAX_EINTRAEGE_PRO_TAG);
             for (int j = 0; j < anzahl; j++) {
                 Eintrag e = tagEintraege.get(j);
                 String baustelleName = alleBaustellen.stream()
-                        .filter(b -> b.id == (e.baustelleId != null ? e.baustelleId : -1))
-                        .map(b -> b.name)
+                        .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
+                        .map(Baustelle::getName)
                         .findFirst()
                         .orElse("");
                 items.add(new EintraegeAdapter.EintragItem(e, baustelleName));
             }
 
-            if (tagEintraege.size() > 2) {
+            if (tagEintraege.size() > MAX_EINTRAEGE_PRO_TAG) {
                 items.add(new EintraegeAdapter.MehrItem());
             }
         }

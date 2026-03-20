@@ -11,19 +11,33 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import java.util.List;
 
+/**
+ * RecyclerView-Adapter zur Darstellung einer Liste von Baustellen.
+ * Unterstützt effiziente Listenaktualisierung via DiffUtil und Favorit-Toggle.
+ * @author Nico Hoffmann
+ * @version 1.0
+ */
 public class BaustellenAdapter extends RecyclerView.Adapter<BaustellenAdapter.ViewHolder> {
 
-    private List<Baustelle> baustellen;
-    private OnFavoritClickListener favoritListener;
+    // ====================================
+    // Instance Variables
+    // ====================================
 
-    public interface OnFavoritClickListener {
-        void onFavoritClick(Baustelle baustelle);
-    }
+    private List<Baustelle> baustellen;
+    private final OnFavoritClickListener favoritListener;
+
+    // ====================================
+    // Constructors
+    // ====================================
 
     public BaustellenAdapter(List<Baustelle> baustellen, OnFavoritClickListener favoritListener) {
         this.baustellen = baustellen;
         this.favoritListener = favoritListener;
     }
+
+    // ====================================
+    // Business Logic Methods
+    // ====================================
 
     public void setBaustellen(List<Baustelle> neueListe) {
         DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
@@ -39,16 +53,16 @@ public class BaustellenAdapter extends RecyclerView.Adapter<BaustellenAdapter.Vi
 
             @Override
             public boolean areItemsTheSame(int oldPos, int newPos) {
-                return baustellen.get(oldPos).id == neueListe.get(newPos).id;
+                return baustellen.get(oldPos).getId() == neueListe.get(newPos).getId();
             }
 
             @Override
             public boolean areContentsTheSame(int oldPos, int newPos) {
                 Baustelle alt = baustellen.get(oldPos);
                 Baustelle neu = neueListe.get(newPos);
-                return alt.name.equals(neu.name)
-                        && alt.adresse.equals(neu.adresse)
-                        && alt.isFavorit == neu.isFavorit;
+                return alt.getName().equals(neu.getName())
+                        && alt.getAdresse().equals(neu.getAdresse())
+                        && alt.isFavorit() == neu.isFavorit();
             }
         });
         this.baustellen = neueListe;
@@ -66,10 +80,10 @@ public class BaustellenAdapter extends RecyclerView.Adapter<BaustellenAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Baustelle baustelle = baustellen.get(position);
-        holder.textViewName.setText(baustelle.name);
-        holder.textViewAdresse.setText(baustelle.adresse);
+        holder.textViewName.setText(baustelle.getName());
+        holder.textViewAdresse.setText(baustelle.getAdresse());
         holder.buttonFavorit.setImageResource(
-                baustelle.isFavorit
+                baustelle.isFavorit()
                         ? android.R.drawable.btn_star_big_on
                         : android.R.drawable.btn_star_big_off
         );
@@ -81,7 +95,16 @@ public class BaustellenAdapter extends RecyclerView.Adapter<BaustellenAdapter.Vi
         return baustellen != null ? baustellen.size() : 0;
     }
 
+    // ====================================
+    // Inner Classes
+    // ====================================
+
+    public interface OnFavoritClickListener {
+        void onFavoritClick(Baustelle baustelle);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
+
         TextView textViewName;
         TextView textViewAdresse;
         ImageButton buttonFavorit;

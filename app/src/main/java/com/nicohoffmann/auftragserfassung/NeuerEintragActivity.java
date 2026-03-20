@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -15,20 +16,46 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Activity zum Erstellen eines neuen Arbeitseintrags.
+ * Ermöglicht die Eingabe von Datum, Arbeitszeiten, Baustelle und Beschreibung.
+ * @author Nico Hoffmann
+ * @version 1.0
+ */
 public class NeuerEintragActivity extends AppCompatActivity {
 
-    private TextView textViewDatum, textViewPause;
-    private Button buttonZeitVon, buttonZeitBis, buttonSpeichern;
+    // ====================================
+    // Static Variables
+    // ====================================
+
+    private static final DateTimeFormatter ZEIT_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATUM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final int PAUSE_LANG = 60;
+    private static final int PAUSE_MITTEL = 45;
+    private static final int PAUSE_KURZ = 30;
+    private static final long GRENZE_LANG = 600;
+    private static final long GRENZE_MITTEL = 540;
+    private static final long GRENZE_KURZ = 360;
+
+    // ====================================
+    // Instance Variables
+    // ====================================
+
+    private TextView textViewPause;
+    private Button buttonZeitVon;
+    private Button buttonZeitBis;
     private Spinner spinnerBaustelle;
     private EditText editTextBeschreibung;
 
-    private LocalTime zeitVon, zeitBis;
+    private LocalTime zeitVon;
+    private LocalTime zeitBis;
     private List<Baustelle> baustellenListe = new ArrayList<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private AppDatabase db;
 
-    private static final DateTimeFormatter ZEIT_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
-    private static final DateTimeFormatter DATUM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    // ====================================
+    // Business Logic Methods
+    // ====================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +64,11 @@ public class NeuerEintragActivity extends AppCompatActivity {
 
         db = AppDatabase.getInstance(this);
 
-        textViewDatum = findViewById(R.id.textViewDatum);
+        TextView textViewDatum = findViewById(R.id.textViewDatum);
         textViewPause = findViewById(R.id.textViewPause);
         buttonZeitVon = findViewById(R.id.buttonZeitVon);
         buttonZeitBis = findViewById(R.id.buttonZeitBis);
-        buttonSpeichern = findViewById(R.id.buttonSpeichern);
+        Button buttonSpeichern = findViewById(R.id.buttonSpeichern);
         spinnerBaustelle = findViewById(R.id.spinnerBaustelle);
         editTextBeschreibung = findViewById(R.id.editTextBeschreibung);
 
@@ -62,15 +89,42 @@ public class NeuerEintragActivity extends AppCompatActivity {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerBaustelle.setAdapter(adapter);
 
-            // Favorit vorauswählen
             for (int i = 0; i < baustellen.size(); i++) {
-                if (baustellen.get(i).isFavorit) {
+                if (baustellen.get(i).isFavorit()) {
                     spinnerBaustelle.setSelection(i);
                     break;
                 }
             }
         });
     }
+
+    private void speichereEintrag() {
+        if (zeitVon == null || zeitBis == null) {
+            Toast.makeText(this, getString(R.string.fehler_zeit), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Eintrag eintrag = new Eintrag();
+        eintrag.setDatum(LocalDate.now().format(DATUM_FORMAT));
+        eintrag.setZeitVon(zeitVon.format(ZEIT_FORMAT));
+        eintrag.setZeitBis(zeitBis.format(ZEIT_FORMAT));
+        eintrag.setBeschreibung(editTextBeschreibung.getText().toString().trim());
+        eintrag.setPauseMinuten(berechnePauseMinuten(zeitVon, zeitBis));
+
+        int position = spinnerBaustelle.getSelectedItemPosition();
+        if (!baustellenListe.isEmpty()) {
+            eintrag.setBaustelleId(baustellenListe.get(position).getId());
+        }
+
+        executor.execute(() -> {
+            db.eintragDao().insert(eintrag);
+            runOnUiThread(this::finish);
+        });
+    }
+
+    // ====================================
+    // Utility Methods
+    // ====================================
 
     private void zeigZeitPicker(boolean istVon) {
         LocalTime jetzt = LocalTime.now();
@@ -83,45 +137,16 @@ public class NeuerEintragActivity extends AppCompatActivity {
                 zeitBis = zeit;
                 buttonZeitBis.setText(zeit.format(ZEIT_FORMAT));
             }
-            berechnePause();
+            textViewPause.setText(getString(R.string.label_pause, berechnePauseMinuten(zeitVon, zeitBis)));
         }, jetzt.getHour(), jetzt.getMinute(), true).show();
     }
 
-    private void berechnePause() {
-        if (zeitVon == null || zeitBis == null) return;
-        long minuten = java.time.Duration.between(zeitVon, zeitBis).toMinutes();
-        int pause = 0;
-        if (minuten > 600) pause = 60;
-        else if (minuten > 540) pause = 45;
-        else if (minuten > 360) pause = 30;
-        textViewPause.setText(getString(R.string.label_pause, pause));
-    }
-
-    private void speichereEintrag() {
-        if (zeitVon == null || zeitBis == null) {
-            Toast.makeText(this, getString(R.string.fehler_zeit), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Eintrag eintrag = new Eintrag();
-        eintrag.datum = LocalDate.now().format(DATUM_FORMAT);
-        eintrag.zeitVon = zeitVon.format(ZEIT_FORMAT);
-        eintrag.zeitBis = zeitBis.format(ZEIT_FORMAT);
-        eintrag.beschreibung = editTextBeschreibung.getText().toString().trim();
-
-        long minuten = java.time.Duration.between(zeitVon, zeitBis).toMinutes();
-        if (minuten > 600) eintrag.pauseMinuten = 60;
-        else if (minuten > 540) eintrag.pauseMinuten = 45;
-        else if (minuten > 360) eintrag.pauseMinuten = 30;
-
-        int position = spinnerBaustelle.getSelectedItemPosition();
-        if (!baustellenListe.isEmpty()) {
-            eintrag.baustelleId = baustellenListe.get(position).id;
-        }
-
-        executor.execute(() -> {
-            db.eintragDao().insert(eintrag);
-            runOnUiThread(this::finish);
-        });
+    private int berechnePauseMinuten(LocalTime von, LocalTime bis) {
+        if (von == null || bis == null) return 0;
+        long minuten = Duration.between(von, bis).toMinutes();
+        if (minuten > GRENZE_LANG) return PAUSE_LANG;
+        if (minuten > GRENZE_MITTEL) return PAUSE_MITTEL;
+        if (minuten > GRENZE_KURZ) return PAUSE_KURZ;
+        return 0;
     }
 }
