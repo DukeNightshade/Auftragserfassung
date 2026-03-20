@@ -10,40 +10,39 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
 import java.util.List;
 
+/**
+ * RecyclerView-Adapter zur Darstellung von Einträgen gruppiert nach Wochentagen.
+ * Unterstützt drei Listentypen: Header, Eintrag und "Mehr anzeigen".
+ * @author Nico Hoffmann
+ * @version 1.0
+ */
 public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    // ====================================
+    // Static Variables
+    // ====================================
 
     private static final int TYP_HEADER = 0;
     private static final int TYP_EINTRAG = 1;
     private static final int TYP_MEHR = 2;
 
-    public abstract static class ListItem {}
-
-    public static class HeaderItem extends ListItem {
-        public String tag;
-        public HeaderItem(String tag) { this.tag = tag; }
-    }
-
-    public static class EintragItem extends ListItem {
-        public Eintrag eintrag;
-        public String baustelleName;
-        public EintragItem(Eintrag eintrag, String baustelleName) {
-            this.eintrag = eintrag;
-            this.baustelleName = baustelleName;
-        }
-    }
-
-    public static class MehrItem extends ListItem {}
+    // ====================================
+    // Instance Variables
+    // ====================================
 
     private List<ListItem> items;
+
+    // ====================================
+    // Constructors
+    // ====================================
 
     public EintraegeAdapter(List<ListItem> items) {
         this.items = items;
     }
 
-    public void setItems(List<ListItem> items) {
-        this.items = items;
-        notifyDataSetChanged();
-    }
+    // ====================================
+    // Business Logic Methods
+    // ====================================
 
     @Override
     public int getItemViewType(int position) {
@@ -69,13 +68,13 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderViewHolder) {
-            ((HeaderViewHolder) holder).textView.setText(((HeaderItem) items.get(position)).tag);
+            ((HeaderViewHolder) holder).textView.setText(((HeaderItem) items.get(position)).getTag());
         } else if (holder instanceof EintragViewHolder) {
             EintragItem item = (EintragItem) items.get(position);
             EintragViewHolder h = (EintragViewHolder) holder;
-            h.textViewZeit.setText(item.eintrag.zeitVon + " – " + item.eintrag.zeitBis);
-            h.textViewBaustelle.setText(item.baustelleName);
-            h.textViewBeschreibung.setText(item.eintrag.beschreibung);
+            h.textViewZeit.setText(item.getEintrag().getZeitVon() + " – " + item.getEintrag().getZeitBis());
+            h.textViewBaustelle.setText(item.getBaustelleName());
+            h.textViewBeschreibung.setText(item.getEintrag().getBeschreibung());
         }
     }
 
@@ -84,9 +83,51 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return items != null ? items.size() : 0;
     }
 
+    // ====================================
+    // Utility Methods
+    // ====================================
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setItems(List<ListItem> items) {
+        this.items = items;
+        notifyDataSetChanged();
+    }
+
+    // ====================================
+    // Inner Classes
+    // ====================================
+
+    public interface ListItem {}
+
+    public static class HeaderItem implements ListItem {
+        private final String tag;
+
+        public HeaderItem(String tag) { this.tag = tag; }
+
+        public String getTag() { return tag; }
+    }
+
+    public static class EintragItem implements ListItem {
+        private final Eintrag eintrag;
+        private final String baustelleName;
+
+        public EintragItem(Eintrag eintrag, String baustelleName) {
+            this.eintrag = eintrag;
+            this.baustelleName = baustelleName;
+        }
+
+        public Eintrag getEintrag() { return eintrag; }
+        public String getBaustelleName() { return baustelleName; }
+    }
+
+    public static class MehrItem implements ListItem {}
+
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
-        HeaderViewHolder(View v) { super(v); textView = v.findViewById(R.id.textViewTagHeader); }
+        HeaderViewHolder(View v) {
+            super(v);
+            textView = v.findViewById(R.id.textViewTagHeader);
+        }
     }
 
     static class EintragViewHolder extends RecyclerView.ViewHolder {
