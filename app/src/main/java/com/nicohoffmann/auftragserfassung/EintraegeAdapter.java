@@ -7,8 +7,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * RecyclerView-Adapter zur Darstellung von Einträgen gruppiert nach Wochentagen.
@@ -25,6 +27,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private static final int TYP_HEADER = 0;
     private static final int TYP_EINTRAG = 1;
     private static final int TYP_MEHR = 2;
+    private static final int MAX_EINTRAEGE_PRO_TAG = 2;
 
     // ====================================
     // Instance Variables
@@ -65,23 +68,69 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderViewHolder) {
-            ((HeaderViewHolder) holder).textView.setText(((HeaderItem) items.get(position)).getTag());
+            bindHeader((HeaderViewHolder) holder, position);
         } else if (holder instanceof EintragViewHolder) {
-            EintragItem item = (EintragItem) items.get(position);
-            EintragViewHolder h = (EintragViewHolder) holder;
-            h.textViewZeit.setText(item.getEintrag().getZeitVon() + " – " + item.getEintrag().getZeitBis());
-            h.textViewBaustelle.setText(item.getBaustelleName());
-            h.textViewBeschreibung.setText(item.getEintrag().getBeschreibung());
-
-            h.itemView.setOnClickListener(v -> {
-                if (clickListener != null) clickListener.onEintragClick(item);
-            });
+            bindEintrag((EintragViewHolder) holder, position);
+        } else if (holder instanceof MehrViewHolder) {
+            bindMehr((MehrViewHolder) holder, position);
         }
     }
+
+    @SuppressLint("SetTextI18n")
+    private void bindHeader(HeaderViewHolder h, int position) {
+        HeaderItem headerItem = (HeaderItem) items.get(position);
+        h.textView.setText(headerItem.getTag());
+        h.textViewDatum.setText(headerItem.getDatum());
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void bindEintrag(EintragViewHolder h, int position) {
+        EintragItem item = (EintragItem) items.get(position);
+        h.textViewZeit.setText(item.getEintrag().getZeitVon() + " – " + item.getEintrag().getZeitBis());
+        h.textViewBaustelle.setText(item.getBaustelleName());
+        h.textViewBeschreibung.setText(item.getEintrag().getBeschreibung());
+        h.itemView.setOnClickListener(v -> {
+            if (clickListener != null) clickListener.onEintragClick(item);
+        });
+    }
+
+    private void bindMehr(MehrViewHolder h, int position) {
+        MehrItem mehrItem = (MehrItem) items.get(position);
+        long versteckt = mehrItem.getAlleEintraege().stream()
+                .filter(e -> e.getDatum().equals(mehrItem.getDatum()))
+                .count() - MAX_EINTRAEGE_PRO_TAG;
+        h.textViewMehr.setText(h.itemView.getContext()
+                .getString(R.string.label_mehr_anzahl, versteckt));
+        h.itemView.setOnClickListener(v -> expandMehr(h, mehrItem));
+    }
+
+    private void expandMehr(MehrViewHolder h, MehrItem mehrItem) {
+        int pos = h.getBindingAdapterPosition();
+        if (pos == RecyclerView.NO_ID) return;
+        items.remove(pos);
+
+        List<Eintrag> tagesEintraege = mehrItem.getAlleEintraege().stream()
+                .filter(e -> e.getDatum().equals(mehrItem.getDatum()))
+                .collect(Collectors.toList());
+
+        int einfuegeIndex = pos;
+        for (int i = MAX_EINTRAEGE_PRO_TAG; i < tagesEintraege.size(); i++) {
+            Eintrag e = tagesEintraege.get(i);
+            String baustelleName = mehrItem.getAlleBaustellen().stream()
+                    .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
+                    .map(Baustelle::getName)
+                    .findFirst()
+                    .orElse("");
+            items.add(einfuegeIndex++, new EintragItem(e, baustelleName));
+        }
+
+        notifyItemRemoved(pos);
+        notifyItemRangeInserted(pos, tagesEintraege.size() - MAX_EINTRAEGE_PRO_TAG);
+    }
+
 
     @Override
     public int getItemCount() {
@@ -114,8 +163,15 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public static class HeaderItem implements ListItem {
         private final String tag;
-        public HeaderItem(String tag) { this.tag = tag; }
+        private final String datum;
+
+        public HeaderItem(String tag, String datum) {
+            this.tag = tag;
+            this.datum = datum;
+        }
+
         public String getTag() { return tag; }
+        public String getDatum() { return datum; }
     }
 
     public static class EintragItem implements ListItem {
@@ -131,13 +187,29 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         public String getBaustelleName() { return baustelleName; }
     }
 
-    public static class MehrItem implements ListItem {}
+    public static class MehrItem implements ListItem {
+        private final String datum;
+        private final List<Eintrag> alleEintraege;
+        private final List<Baustelle> alleBaustellen;
+
+        public MehrItem(String datum, List<Eintrag> alleEintraege, List<Baustelle> alleBaustellen) {
+            this.datum = datum;
+            this.alleEintraege = alleEintraege;
+            this.alleBaustellen = alleBaustellen;
+        }
+
+        public String getDatum() { return datum; }
+        public List<Eintrag> getAlleEintraege() { return alleEintraege; }
+        public List<Baustelle> getAlleBaustellen() { return alleBaustellen; }
+    }
 
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
+        TextView textViewDatum;
         HeaderViewHolder(View v) {
             super(v);
             textView = v.findViewById(R.id.textViewTagHeader);
+            textViewDatum = v.findViewById(R.id.textViewTagDatum);
         }
     }
 
@@ -154,6 +226,10 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     static class MehrViewHolder extends RecyclerView.ViewHolder {
-        MehrViewHolder(View v) { super(v); }
+        TextView textViewMehr;
+        MehrViewHolder(View v) {
+            super(v);
+            textViewMehr = v.findViewById(R.id.textViewMehr);
+        }
     }
 }

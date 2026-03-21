@@ -38,4 +38,5 @@
     <string name="dialog_loeschen_nachricht">Möchtest du diesen Eintrag wirklich löschen?</string>
     <string name="label_arbeitszeit">Arbeitszeit: %1$s</string>
     <string name="placeholder_datum">Datum wählen</string>
+    <string name="label_mehr_anzahl">+ %1$d weitere Einträge anzeigen</string>
 </resources>

@@ -271,8 +271,10 @@ public class MainActivity extends AppCompatActivity {
                 .forEach(datum -> {
                     // Datum als lesbarer Header: "21.03.2025"
                     LocalDate localDate = LocalDate.parse(datum, DB_DATUM_FORMAT);
-                    String header = localDate.format(DATUM_FORMAT);
-                    items.add(new EintraegeAdapter.HeaderItem(header));
+                    items.add(new EintraegeAdapter.HeaderItem(
+                            localDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMAN),
+                            localDate.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN))
+                    ));
 
                     List<Eintrag> tagesEintraege = Objects.requireNonNullElse(gruppiertNachTag.get(datum), new ArrayList<>());
                     for (Eintrag e : tagesEintraege) {
@@ -347,7 +349,8 @@ public class MainActivity extends AppCompatActivity {
                     gruppiertNachTag.get(datum), new ArrayList<>()
             );
 
-            items.add(new EintraegeAdapter.HeaderItem(tagName));
+            String datumAnzeige = tag.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN));
+            items.add(new EintraegeAdapter.HeaderItem(tagName, datumAnzeige));
 
             int anzahl = Math.min(tagEintraege.size(), MAX_EINTRAEGE_PRO_TAG);
             for (int j = 0; j < anzahl; j++) {
@@ -361,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (tagEintraege.size() > MAX_EINTRAEGE_PRO_TAG) {
-                items.add(new EintraegeAdapter.MehrItem());
+                items.add(new EintraegeAdapter.MehrItem(datum, tagEintraege, alleBaustellen));
             }
         }
 
