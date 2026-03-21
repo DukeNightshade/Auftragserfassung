@@ -1,5 +1,6 @@
 package com.nicohoffmann.auftragserfassung;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,6 +97,11 @@ public class BaustellenAdapter extends RecyclerView.Adapter<BaustellenAdapter.Vi
     }
 
     // ====================================
+    // Utility Methods
+    // ====================================
+
+
+    // ====================================
     // Inner Classes
     // ====================================
 
@@ -104,7 +110,6 @@ public class BaustellenAdapter extends RecyclerView.Adapter<BaustellenAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
         TextView textViewName;
         TextView textViewAdresse;
         ImageButton buttonFavorit;
