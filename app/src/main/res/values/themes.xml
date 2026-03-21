@@ -13,8 +13,15 @@
         <item name="colorError">@color/colorError</item>
         <item name="android:statusBarColor">@color/colorSecondaryDark</item>
         <item name="android:navigationBarColor">@color/colorSecondary</item>
+        <!-- FAB Farbe -->
+        <item name="floatingActionButtonStyle">@style/Style.FAB.Umbrella</item>
     </style>
 
     <style name="Theme.Auftragserfassung" parent="Base.Theme.Auftragserfassung" />
+
+    <style name="Style.FAB.Umbrella" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="tint">@color/colorOnPrimary</item>
+    </style>
 
 </resources>
