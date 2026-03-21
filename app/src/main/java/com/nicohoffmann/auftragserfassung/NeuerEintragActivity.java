@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Activity zum Erstellen eines neuen Arbeitseintrags.
+ * Activity zum Erstellen oder Bearbeiten eines Arbeitseintrags.
  * Ermöglicht die Eingabe von Datum, Arbeitszeiten, Baustelle und Beschreibung.
  * @author Nico Hoffmann
  * @version 1.0
@@ -36,6 +36,7 @@ public class NeuerEintragActivity extends AppCompatActivity {
     private static final long GRENZE_LANG = 600;
     private static final long GRENZE_MITTEL = 540;
     private static final long GRENZE_KURZ = 360;
+    public static final String EXTRA_EINTRAG_ID = "eintrag_id";
 
     // ====================================
     // Instance Variables
@@ -52,6 +53,8 @@ public class NeuerEintragActivity extends AppCompatActivity {
     private List<Baustelle> baustellenListe = new ArrayList<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private AppDatabase db;
+
+    private Eintrag zuBearbeitenderEintrag = null;
 
     // ====================================
     // Business Logic Methods
@@ -79,6 +82,38 @@ public class NeuerEintragActivity extends AppCompatActivity {
         buttonZeitVon.setOnClickListener(v -> zeigZeitPicker(true));
         buttonZeitBis.setOnClickListener(v -> zeigZeitPicker(false));
         buttonSpeichern.setOnClickListener(v -> speichereEintrag());
+
+        // Bearbeitungsmodus: Eintrag-ID aus Intent lesen
+        int eintragId = getIntent().getIntExtra(EXTRA_EINTRAG_ID, -1);
+        if (eintragId != -1) {
+            ladeEintragZumBearbeiten(eintragId);
+        }
+    }
+
+    private void ladeEintragZumBearbeiten(int id) {
+        executor.execute(() -> {
+            Eintrag eintrag = db.eintragDao().getById(id);
+            if (eintrag == null) return;
+            zuBearbeitenderEintrag = eintrag;
+
+            runOnUiThread(() -> {
+                zeitVon = LocalTime.parse(eintrag.getZeitVon(), ZEIT_FORMAT);
+                zeitBis = LocalTime.parse(eintrag.getZeitBis(), ZEIT_FORMAT);
+                buttonZeitVon.setText(eintrag.getZeitVon());
+                buttonZeitBis.setText(eintrag.getZeitBis());
+                editTextBeschreibung.setText(eintrag.getBeschreibung());
+                textViewPause.setText(getString(R.string.label_pause,
+                        berechnePauseMinuten(zeitVon, zeitBis)));
+
+                // Baustelle vorauswählen
+                for (int i = 0; i < baustellenListe.size(); i++) {
+                    if (baustellenListe.get(i).getId() == eintrag.getBaustelleId()) {
+                        spinnerBaustelle.setSelection(i);
+                        break;
+                    }
+                }
+            });
+        });
     }
 
     private void ladeBaustellen() {
@@ -95,6 +130,17 @@ public class NeuerEintragActivity extends AppCompatActivity {
                     break;
                 }
             }
+
+            // Wenn Bearbeitung: nach Laden der Baustellen nochmals vorauswählen
+            if (zuBearbeitenderEintrag != null && zuBearbeitenderEintrag.getBaustelleId() != null) {
+                for (int i = 0; i < baustellen.size(); i++) {
+                    if (baustellen.get(i).getId() == zuBearbeitenderEintrag.getBaustelleId()) {
+                        spinnerBaustelle.setSelection(i);
+                        break;
+                    }
+                }
+            }
+
         });
     }
 
@@ -104,22 +150,36 @@ public class NeuerEintragActivity extends AppCompatActivity {
             return;
         }
 
-        Eintrag eintrag = new Eintrag();
-        eintrag.setDatum(LocalDate.now().format(DATUM_FORMAT));
-        eintrag.setZeitVon(zeitVon.format(ZEIT_FORMAT));
-        eintrag.setZeitBis(zeitBis.format(ZEIT_FORMAT));
-        eintrag.setBeschreibung(editTextBeschreibung.getText().toString().trim());
-        eintrag.setPauseMinuten(berechnePauseMinuten(zeitVon, zeitBis));
-
         int position = spinnerBaustelle.getSelectedItemPosition();
-        if (!baustellenListe.isEmpty()) {
-            eintrag.setBaustelleId(baustellenListe.get(position).getId());
-        }
+        Integer baustelleId = baustellenListe.isEmpty() ? null : baustellenListe.get(position).getId();
 
-        executor.execute(() -> {
-            db.eintragDao().insert(eintrag);
-            runOnUiThread(this::finish);
-        });
+        if (zuBearbeitenderEintrag != null) {
+            // Bearbeitung: bestehenden Eintrag updaten
+            zuBearbeitenderEintrag.setZeitVon(zeitVon.format(ZEIT_FORMAT));
+            zuBearbeitenderEintrag.setZeitBis(zeitBis.format(ZEIT_FORMAT));
+            zuBearbeitenderEintrag.setBeschreibung(editTextBeschreibung.getText().toString().trim());
+            zuBearbeitenderEintrag.setPauseMinuten(berechnePauseMinuten(zeitVon, zeitBis));
+            zuBearbeitenderEintrag.setBaustelleId(baustelleId);
+
+            executor.execute(() -> {
+                db.eintragDao().update(zuBearbeitenderEintrag);
+                runOnUiThread(this::finish);
+            });
+        } else {
+            // Neu anlegen
+            Eintrag eintrag = new Eintrag();
+            eintrag.setDatum(LocalDate.now().format(DATUM_FORMAT));
+            eintrag.setZeitVon(zeitVon.format(ZEIT_FORMAT));
+            eintrag.setZeitBis(zeitBis.format(ZEIT_FORMAT));
+            eintrag.setBeschreibung(editTextBeschreibung.getText().toString().trim());
+            eintrag.setPauseMinuten(berechnePauseMinuten(zeitVon, zeitBis));
+            eintrag.setBaustelleId(baustelleId);
+
+            executor.execute(() -> {
+                db.eintragDao().insert(eintrag);
+                runOnUiThread(this::finish);
+            });
+        }
     }
 
     // ====================================
