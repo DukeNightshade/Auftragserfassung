@@ -30,4 +30,5 @@
     <string name="wochentag_so">So</string>
     <string name="detail_datum">Datum: %1$s</string>
     <string name="detail_zeit">Zeit: %1$s – %2$s</string>
+    <string name="label_suchergebnisse">Suche: %1$s</string>
 </resources>
