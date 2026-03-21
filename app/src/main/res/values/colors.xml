@@ -1,5 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- ================================ -->
+    <!-- Umbrella Corp Brand Colors       -->
+    <!-- ================================ -->
+
+    <!-- Primär: Umbrella Rot -->
+    <color name="colorPrimary">#CC0000</color>
+    <color name="colorPrimaryDark">#990000</color>
+    <color name="colorPrimaryLight">#FF3333</color>
+
+    <!-- Sekundär: Dunkelgrau / Fast-Schwarz -->
+    <color name="colorSecondary">#1A1A1A</color>
+    <color name="colorSecondaryDark">#0D0D0D</color>
+    <color name="colorSecondaryLight">#2E2E2E</color>
+
+    <!-- Accent: Kaltes Grau (Stahl) -->
+    <color name="colorAccent">#B0B0B0</color>
+
+    <!-- ================================ -->
+    <!-- Background & Surface             -->
+    <!-- ================================ -->
+
+    <color name="colorBackground">#121212</color>
+    <color name="colorSurface">#1E1E1E</color>
+    <color name="colorSurfaceVariant">#2A2A2A</color>
+
+    <!-- ================================ -->
+    <!-- Text Colors                      -->
+    <!-- ================================ -->
+
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorOnBackground">#EFEFEF</color>
+    <color name="colorOnSurface">#EFEFEF</color>
+    <color name="colorTextSecondary">#888888</color>
+
+    <!-- ================================ -->
+    <!-- Kalender-spezifische Farben      -->
+    <!-- ================================ -->
+
+    <!-- Tag mit Eintrag: gedämpftes Rot -->
+    <color name="colorTagMitEintrag">#3DCC0000</color>
+    <!-- Heutiger Tag: volles Umbrella Rot -->
+    <color name="colorTagHeute">#CC0000</color>
+    <!-- Tag ohne Eintrag -->
+    <color name="colorTagOhneEintrag">#444444</color>
+
+    <!-- ================================ -->
+    <!-- Status Colors                    -->
+    <!-- ================================ -->
+
+    <color name="colorError">#FF5252</color>
+    <color name="colorSuccess">#4CAF50</color>
+    <color name="colorWarning">#FFC107</color>
+
+    <!-- ================================ -->
+    <!-- Base                             -->
+    <!-- ================================ -->
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
 </resources>
