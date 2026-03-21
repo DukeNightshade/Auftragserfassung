@@ -24,6 +24,9 @@ public interface EintragDao {
     @Query("SELECT * FROM eintraege WHERE beschreibung LIKE '%' || :suchbegriff || '%'")
     LiveData<List<Eintrag>> suche(String suchbegriff);
 
+    @Query("SELECT * FROM eintraege WHERE id = :id LIMIT 1")
+    Eintrag getById(int id);
+
     // ====================================
     // Utility Methods
     // ====================================

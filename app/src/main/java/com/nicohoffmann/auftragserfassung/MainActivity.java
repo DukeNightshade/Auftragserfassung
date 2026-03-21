@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -103,9 +105,37 @@ public class MainActivity extends AppCompatActivity {
                     getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
             ((TextView) view.findViewById(R.id.detailBeschreibung)).setText(item.getEintrag().getBeschreibung());
 
+            // Löschen
+            view.findViewById(R.id.buttonLoeschen).setOnClickListener(v ->
+                    new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle(R.string.dialog_loeschen_titel)
+                            .setMessage(R.string.dialog_loeschen_nachricht)
+                            .setPositiveButton(R.string.button_loeschen, (d, w) -> {
+                                try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+                                    executor.execute(() ->
+                                            AppDatabase.getInstance(this).eintragDao().delete(item.getEintrag())
+                                    );
+                                }
+                                dialog.dismiss();
+                            })
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+            );
+
+
+
+            // Ändern
+            view.findViewById(R.id.buttonAendern).setOnClickListener(v -> {
+                Intent intent = new Intent(this, NeuerEintragActivity.class);
+                intent.putExtra(NeuerEintragActivity.EXTRA_EINTRAG_ID, item.getEintrag().getId());
+                startActivity(intent);
+                dialog.dismiss();
+            });
+
             dialog.setContentView(view);
             dialog.show();
         });
+
 
         recyclerViewKalender = findViewById(R.id.recyclerViewKalender);
         recyclerViewKalender.setLayoutManager(new GridLayoutManager(this, 7));
