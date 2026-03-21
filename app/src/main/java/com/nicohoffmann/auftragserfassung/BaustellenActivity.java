@@ -1,5 +1,6 @@
 package com.nicohoffmann.auftragserfassung;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 /**
  * Activity zur Verwaltung von Baustellen.
  * Ermöglicht das Hinzufügen neuer Baustellen sowie das Markieren als Favorit.
+ * Es kann immer nur eine Baustelle als Favorit markiert sein.
  * @author Nico Hoffmann
  * @version 1.0
  */
@@ -26,6 +28,7 @@ public class BaustellenActivity extends AppCompatActivity {
     // Instance Variables
     // ====================================
 
+    private BaustellenAdapter adapter;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     // ====================================
@@ -42,10 +45,16 @@ public class BaustellenActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerViewBaustellen);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        BaustellenAdapter adapter = new BaustellenAdapter(new ArrayList<>(), baustelle ->
+        adapter = new BaustellenAdapter(new ArrayList<>(), baustelle ->
                 executor.execute(() -> {
-                    baustelle.setFavorit(!baustelle.isFavorit());
+                    db.baustelleDao().resetAlleFavoriten();
+                    baustelle.setFavorit(true);
                     db.baustelleDao().update(baustelle);
+                    runOnUiThread(() -> {
+                        @SuppressLint("NotifyDataSetChanged")
+                        Runnable notify = adapter::notifyDataSetChanged;
+                        notify.run();
+                    });
                 })
         );
 

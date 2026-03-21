@@ -24,6 +24,9 @@ public interface BaustelleDao {
     @Query("SELECT * FROM baustellen WHERE isFavorit = 1 LIMIT 1")
     Baustelle getFavoritBaustelle();
 
+    @Query("UPDATE baustellen SET isFavorit = 0")
+    void resetAlleFavoriten();
+
     // ====================================
     // Utility Methods
     // ====================================

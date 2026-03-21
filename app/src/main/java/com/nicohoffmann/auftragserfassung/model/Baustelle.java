@@ -1,5 +1,6 @@
 package com.nicohoffmann.auftragserfassung.model;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -50,4 +51,10 @@ public class Baustelle {
     public void setName(String name) { this.name = name; }
     public void setAdresse(String adresse) { this.adresse = adresse; }
     public void setFavorit(boolean favorit) { isFavorit = favorit; }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

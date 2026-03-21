@@ -70,9 +70,14 @@ public class MainActivity extends AppCompatActivity {
             aktualisiereListe(eintraege);
         });
 
-        FloatingActionButton fab = findViewById(R.id.fabNeuerEintrag);
-        fab.setOnClickListener(v ->
+        FloatingActionButton fabNeuerEintrag = findViewById(R.id.fabNeuerEintrag);
+        fabNeuerEintrag.setOnClickListener(v ->
                 startActivity(new Intent(this, NeuerEintragActivity.class))
+        );
+
+        FloatingActionButton fabBaustellen = findViewById(R.id.fabBaustellen);
+        fabBaustellen.setOnClickListener(v ->
+                startActivity(new Intent(this, BaustellenActivity.class))
         );
 
         SearchView searchView = findViewById(R.id.searchView);

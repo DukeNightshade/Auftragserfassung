@@ -15,4 +15,5 @@
     <string name="fehler_zeit">Bitte Von- und Bis-Zeit angeben</string>
     <string name="hint_suche">Einträge suchen…</string>
     <string name="label_mehr">...</string>
+    <string name="menu_baustellen">Baustellen</string>
 </resources>
