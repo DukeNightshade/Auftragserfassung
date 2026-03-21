@@ -28,7 +28,7 @@
             android:layout_weight="1"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/colorOnSurface" />
 
         <TextView
             android:id="@+id/textViewTagDatum"
