@@ -2,6 +2,7 @@ package com.nicohoffmann.auftragserfassung;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
@@ -81,6 +83,24 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewEintraege.setLayoutManager(new LinearLayoutManager(this));
         eintraegeAdapter = new EintraegeAdapter(new ArrayList<>());
         recyclerViewEintraege.setAdapter(eintraegeAdapter);
+
+        // BottomSheet bei Eintrag-Klick
+        eintraegeAdapter.setOnEintragClickListener(item -> {
+            BottomSheetDialog dialog = new BottomSheetDialog(this);
+            View view = LayoutInflater.from(this).inflate(
+                    R.layout.dialog_eintrag_detail,
+                    dialog.findViewById(android.R.id.content),
+                    false
+            );
+
+            ((TextView) view.findViewById(R.id.detailBaustelle)).setText(item.getBaustelleName());
+            ((TextView) view.findViewById(R.id.detailDatum)).setText(getString(R.string.detail_datum, item.getEintrag().getDatum()));
+            ((TextView) view.findViewById(R.id.detailZeit)).setText(getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
+            ((TextView) view.findViewById(R.id.detailBeschreibung)).setText(item.getEintrag().getBeschreibung());
+
+            dialog.setContentView(view);
+            dialog.show();
+        });
 
         recyclerViewKalender = findViewById(R.id.recyclerViewKalender);
         recyclerViewKalender.setLayoutManager(new GridLayoutManager(this, 7));
@@ -225,12 +245,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewKalender.setAdapter(monatsAdapter);
     }
 
-
     private void onKalenderTagGeklickt(LocalDate datum) {
         aktuellerMontag = datum.with(DayOfWeek.MONDAY);
         istMonatsansicht = false;
 
-        // Toggle zurück auf Woche setzen
         MaterialButtonToggleGroup toggle = findViewById(R.id.toggleAnsicht);
         toggle.check(R.id.buttonWochenansicht);
     }
