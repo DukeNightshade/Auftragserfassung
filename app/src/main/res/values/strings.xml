@@ -19,4 +19,13 @@
     <string name="label_kalenderwoche">KW %d</string>
     <string name="label_wochendatum">%1$s – %2$s</string>
     <string name="button_aktuelle_woche">Aktuelle Woche</string>
+    <string name="ansicht_woche">Woche</string>
+    <string name="ansicht_monat">Monat</string>
+    <string name="wochentag_mo">Mo</string>
+    <string name="wochentag_di">Di</string>
+    <string name="wochentag_mi">Mi</string>
+    <string name="wochentag_do">Do</string>
+    <string name="wochentag_fr">Fr</string>
+    <string name="wochentag_sa">Sa</string>
+    <string name="wochentag_so">So</string>
 </resources>
