@@ -1,5 +1,6 @@
 package com.nicohoffmann.auftragserfassung;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.widget.*;
@@ -13,6 +14,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -42,12 +44,15 @@ public class NeuerEintragActivity extends AppCompatActivity {
     // Instance Variables
     // ====================================
 
+    private Button buttonDatum;
     private TextView textViewPause;
+    private TextView textViewArbeitszeit;
     private Button buttonZeitVon;
     private Button buttonZeitBis;
     private Spinner spinnerBaustelle;
     private EditText editTextBeschreibung;
 
+    private LocalDate gewaehltesDatum;
     private LocalTime zeitVon;
     private LocalTime zeitBis;
     private List<Baustelle> baustellenListe = new ArrayList<>();
@@ -67,15 +72,18 @@ public class NeuerEintragActivity extends AppCompatActivity {
 
         db = AppDatabase.getInstance(this);
 
-        TextView textViewDatum = findViewById(R.id.textViewDatum);
+        buttonDatum = findViewById(R.id.buttonDatum);
         textViewPause = findViewById(R.id.textViewPause);
+        textViewArbeitszeit = findViewById(R.id.textViewArbeitszeit);
         buttonZeitVon = findViewById(R.id.buttonZeitVon);
         buttonZeitBis = findViewById(R.id.buttonZeitBis);
         Button buttonSpeichern = findViewById(R.id.buttonSpeichern);
         spinnerBaustelle = findViewById(R.id.spinnerBaustelle);
         editTextBeschreibung = findViewById(R.id.editTextBeschreibung);
 
-        textViewDatum.setText(LocalDate.now().format(DATUM_FORMAT));
+        gewaehltesDatum = LocalDate.now();
+        buttonDatum.setText(gewaehltesDatum.format(DATUM_FORMAT));
+        buttonDatum.setOnClickListener(v -> zeigDatumPicker());
 
         ladeBaustellen();
 
@@ -83,7 +91,6 @@ public class NeuerEintragActivity extends AppCompatActivity {
         buttonZeitBis.setOnClickListener(v -> zeigZeitPicker(false));
         buttonSpeichern.setOnClickListener(v -> speichereEintrag());
 
-        // Bearbeitungsmodus: Eintrag-ID aus Intent lesen
         int eintragId = getIntent().getIntExtra(EXTRA_EINTRAG_ID, -1);
         if (eintragId != -1) {
             ladeEintragZumBearbeiten(eintragId);
@@ -97,6 +104,9 @@ public class NeuerEintragActivity extends AppCompatActivity {
             zuBearbeitenderEintrag = eintrag;
 
             runOnUiThread(() -> {
+                gewaehltesDatum = LocalDate.parse(eintrag.getDatum(), DATUM_FORMAT);
+                buttonDatum.setText(eintrag.getDatum());
+
                 zeitVon = LocalTime.parse(eintrag.getZeitVon(), ZEIT_FORMAT);
                 zeitBis = LocalTime.parse(eintrag.getZeitBis(), ZEIT_FORMAT);
                 buttonZeitVon.setText(eintrag.getZeitVon());
@@ -104,12 +114,15 @@ public class NeuerEintragActivity extends AppCompatActivity {
                 editTextBeschreibung.setText(eintrag.getBeschreibung());
                 textViewPause.setText(getString(R.string.label_pause,
                         berechnePauseMinuten(zeitVon, zeitBis)));
+                textViewArbeitszeit.setText(getString(R.string.label_arbeitszeit,
+                        berechneArbeitszeit(zeitVon, zeitBis)));
 
-                // Baustelle vorauswählen
-                for (int i = 0; i < baustellenListe.size(); i++) {
-                    if (baustellenListe.get(i).getId() == eintrag.getBaustelleId()) {
-                        spinnerBaustelle.setSelection(i);
-                        break;
+                if (eintrag.getBaustelleId() != null) {
+                    for (int i = 0; i < baustellenListe.size(); i++) {
+                        if (baustellenListe.get(i).getId() == eintrag.getBaustelleId()) {
+                            spinnerBaustelle.setSelection(i);
+                            break;
+                        }
                     }
                 }
             });
@@ -131,7 +144,6 @@ public class NeuerEintragActivity extends AppCompatActivity {
                 }
             }
 
-            // Wenn Bearbeitung: nach Laden der Baustellen nochmals vorauswählen
             if (zuBearbeitenderEintrag != null && zuBearbeitenderEintrag.getBaustelleId() != null) {
                 for (int i = 0; i < baustellen.size(); i++) {
                     if (baustellen.get(i).getId() == zuBearbeitenderEintrag.getBaustelleId()) {
@@ -140,7 +152,6 @@ public class NeuerEintragActivity extends AppCompatActivity {
                     }
                 }
             }
-
         });
     }
 
@@ -154,7 +165,7 @@ public class NeuerEintragActivity extends AppCompatActivity {
         Integer baustelleId = baustellenListe.isEmpty() ? null : baustellenListe.get(position).getId();
 
         if (zuBearbeitenderEintrag != null) {
-            // Bearbeitung: bestehenden Eintrag updaten
+            zuBearbeitenderEintrag.setDatum(gewaehltesDatum.format(DATUM_FORMAT));
             zuBearbeitenderEintrag.setZeitVon(zeitVon.format(ZEIT_FORMAT));
             zuBearbeitenderEintrag.setZeitBis(zeitBis.format(ZEIT_FORMAT));
             zuBearbeitenderEintrag.setBeschreibung(editTextBeschreibung.getText().toString().trim());
@@ -166,9 +177,8 @@ public class NeuerEintragActivity extends AppCompatActivity {
                 runOnUiThread(this::finish);
             });
         } else {
-            // Neu anlegen
             Eintrag eintrag = new Eintrag();
-            eintrag.setDatum(LocalDate.now().format(DATUM_FORMAT));
+            eintrag.setDatum(gewaehltesDatum.format(DATUM_FORMAT));
             eintrag.setZeitVon(zeitVon.format(ZEIT_FORMAT));
             eintrag.setZeitBis(zeitBis.format(ZEIT_FORMAT));
             eintrag.setBeschreibung(editTextBeschreibung.getText().toString().trim());
@@ -186,6 +196,16 @@ public class NeuerEintragActivity extends AppCompatActivity {
     // Utility Methods
     // ====================================
 
+    private void zeigDatumPicker() {
+        new DatePickerDialog(this, (view, jahr, monat, tag) -> {
+            gewaehltesDatum = LocalDate.of(jahr, monat + 1, tag);
+            buttonDatum.setText(gewaehltesDatum.format(DATUM_FORMAT));
+        },
+                gewaehltesDatum.getYear(),
+                gewaehltesDatum.getMonthValue() - 1,
+                gewaehltesDatum.getDayOfMonth()).show();
+    }
+
     private void zeigZeitPicker(boolean istVon) {
         LocalTime jetzt = LocalTime.now();
         new TimePickerDialog(this, (view, stunde, minute) -> {
@@ -197,8 +217,22 @@ public class NeuerEintragActivity extends AppCompatActivity {
                 zeitBis = zeit;
                 buttonZeitBis.setText(zeit.format(ZEIT_FORMAT));
             }
-            textViewPause.setText(getString(R.string.label_pause, berechnePauseMinuten(zeitVon, zeitBis)));
+            textViewPause.setText(getString(R.string.label_pause,
+                    berechnePauseMinuten(zeitVon, zeitBis)));
+            textViewArbeitszeit.setText(getString(R.string.label_arbeitszeit,
+                    berechneArbeitszeit(zeitVon, zeitBis)));
         }, jetzt.getHour(), jetzt.getMinute(), true).show();
+    }
+
+    private String berechneArbeitszeit(LocalTime von, LocalTime bis) {
+        if (von == null || bis == null) return "";
+        long gesamtMinuten = Duration.between(von, bis).toMinutes();
+        int pause = berechnePauseMinuten(von, bis);
+        long nettoMinuten = gesamtMinuten - pause;
+        if (nettoMinuten < 0) nettoMinuten = 0;
+        long stunden = nettoMinuten / 60;
+        long minuten = nettoMinuten % 60;
+        return String.format(Locale.GERMAN, "%02d:%02d", stunden, minuten);
     }
 
     private int berechnePauseMinuten(LocalTime von, LocalTime bis) {
