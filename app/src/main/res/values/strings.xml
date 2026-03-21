@@ -28,4 +28,6 @@
     <string name="wochentag_fr">Fr</string>
     <string name="wochentag_sa">Sa</string>
     <string name="wochentag_so">So</string>
+    <string name="detail_datum">Datum: %1$s</string>
+    <string name="detail_zeit">Zeit: %1$s – %2$s</string>
 </resources>

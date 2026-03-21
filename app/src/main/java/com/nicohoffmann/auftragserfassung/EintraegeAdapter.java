@@ -31,6 +31,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     // ====================================
 
     private List<ListItem> items;
+    private OnEintragClickListener clickListener;
 
     // ====================================
     // Constructors
@@ -75,6 +76,10 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             h.textViewZeit.setText(item.getEintrag().getZeitVon() + " – " + item.getEintrag().getZeitBis());
             h.textViewBaustelle.setText(item.getBaustelleName());
             h.textViewBeschreibung.setText(item.getEintrag().getBeschreibung());
+
+            h.itemView.setOnClickListener(v -> {
+                if (clickListener != null) clickListener.onEintragClick(item);
+            });
         }
     }
 
@@ -93,17 +98,23 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         notifyDataSetChanged();
     }
 
+    public void setOnEintragClickListener(OnEintragClickListener listener) {
+        this.clickListener = listener;
+    }
+
     // ====================================
-    // Inner Classes
+    // Inner Classes / Interfaces
     // ====================================
+
+    public interface OnEintragClickListener {
+        void onEintragClick(EintragItem item);
+    }
 
     public interface ListItem {}
 
     public static class HeaderItem implements ListItem {
         private final String tag;
-
         public HeaderItem(String tag) { this.tag = tag; }
-
         public String getTag() { return tag; }
     }
 
