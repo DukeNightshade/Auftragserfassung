@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int MAX_EINTRAEGE_PRO_TAG = 2;
     private static final DateTimeFormatter DATUM_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter MONAT_FORMAT = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.GERMAN);
+    private static final DateTimeFormatter DB_DATUM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // ====================================
     // Instance Variables
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private LocalDate aktuellerMontag;
     private YearMonth aktuellerMonat;
     private boolean istMonatsansicht = false;
+    private String aktuellerSuchtext = "";
 
     private TextView textViewWochendatum;
     private TextView textViewKalenderwoche;
@@ -94,8 +97,10 @@ public class MainActivity extends AppCompatActivity {
             );
 
             ((TextView) view.findViewById(R.id.detailBaustelle)).setText(item.getBaustelleName());
-            ((TextView) view.findViewById(R.id.detailDatum)).setText(getString(R.string.detail_datum, item.getEintrag().getDatum()));
-            ((TextView) view.findViewById(R.id.detailZeit)).setText(getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
+            ((TextView) view.findViewById(R.id.detailDatum)).setText(
+                    getString(R.string.detail_datum, item.getEintrag().getDatum()));
+            ((TextView) view.findViewById(R.id.detailZeit)).setText(
+                    getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
             ((TextView) view.findViewById(R.id.detailBeschreibung)).setText(item.getEintrag().getBeschreibung());
 
             dialog.setContentView(view);
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
         db.baustelleDao().getAlleBaustellen().observe(this, baustellen -> {
             alleBaustellen = baustellen;
-            aktualisiereWochenliste(alleEintraege);
+            aktualisiereAnsicht();
         });
 
         db.eintragDao().getAlleEintraege().observe(this, eintraege -> {
@@ -153,15 +158,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    aktualisiereWochenliste(alleEintraege);
-                } else {
-                    List<Eintrag> gefiltert = alleEintraege.stream()
-                            .filter(e -> e.getBeschreibung() != null &&
-                                    e.getBeschreibung().toLowerCase().contains(newText.toLowerCase()))
-                            .collect(Collectors.toList());
-                    aktualisiereWochenliste(gefiltert);
-                }
+                aktuellerSuchtext = newText.trim();
+                aktualisiereAnsicht();
                 return true;
             }
         });
@@ -198,6 +196,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void aktualisiereAnsicht() {
+        // Suche aktiv → eigene Suchergebnisliste, unabhängig von Ansicht
+        if (!aktuellerSuchtext.isEmpty()) {
+            recyclerViewEintraege.setVisibility(View.VISIBLE);
+            recyclerViewKalender.setVisibility(View.GONE);
+            layoutWochentagHeader.setVisibility(View.GONE);
+            zeigeSuchergebnisse(aktuellerSuchtext);
+            return;
+        }
+
         if (istMonatsansicht) {
             recyclerViewEintraege.setVisibility(View.GONE);
             recyclerViewKalender.setVisibility(View.VISIBLE);
@@ -210,6 +217,45 @@ public class MainActivity extends AppCompatActivity {
             layoutWochentagHeader.setVisibility(View.GONE);
             aktualisiereWochenliste(alleEintraege);
         }
+    }
+
+    private void zeigeSuchergebnisse(String suchtext) {
+        textViewWochendatum.setText(getString(R.string.label_suchergebnisse, suchtext));
+        textViewKalenderwoche.setText("");
+
+        List<Eintrag> gefiltert = alleEintraege.stream()
+                .filter(e -> e.getBeschreibung() != null &&
+                        e.getBeschreibung().toLowerCase(Locale.GERMAN)
+                                .contains(suchtext.toLowerCase(Locale.GERMAN)))
+                .sorted(Comparator.comparing(Eintrag::getDatum).reversed())
+                .collect(Collectors.toList());
+
+        List<EintraegeAdapter.ListItem> items = new ArrayList<>();
+
+        Map<String, List<Eintrag>> gruppiertNachTag = gefiltert.stream()
+                .collect(Collectors.groupingBy(Eintrag::getDatum));
+
+        gefiltert.stream()
+                .map(Eintrag::getDatum)
+                .distinct()
+                .forEach(datum -> {
+                    // Datum als lesbarer Header: "21.03.2025"
+                    LocalDate localDate = LocalDate.parse(datum, DB_DATUM_FORMAT);
+                    String header = localDate.format(DATUM_FORMAT);
+                    items.add(new EintraegeAdapter.HeaderItem(header));
+
+                    List<Eintrag> tagesEintraege = Objects.requireNonNullElse(gruppiertNachTag.get(datum), new ArrayList<>());
+                    for (Eintrag e : tagesEintraege) {
+                        String baustelleName = alleBaustellen.stream()
+                                .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
+                                .map(Baustelle::getName)
+                                .findFirst()
+                                .orElse("");
+                        items.add(new EintraegeAdapter.EintragItem(e, baustelleName));
+                    }
+                });
+
+        eintraegeAdapter.setItems(items);
     }
 
     private void aktualisiereMonatsinfo() {
@@ -263,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < 7; i++) {
             LocalDate tag = aktuellerMontag.plusDays(i);
-            String datum = tag.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String datum = tag.format(DB_DATUM_FORMAT);
             String tagName = tag.getDayOfWeek()
                     .getDisplayName(TextStyle.FULL, Locale.GERMAN);
 
