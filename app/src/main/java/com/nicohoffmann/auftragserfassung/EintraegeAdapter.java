@@ -96,16 +96,22 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         h.textViewDatum.setText(headerItem.getDatum());
 
         if (headerItem.getArbeitszeit() != null && !headerItem.getArbeitszeit().isEmpty()) {
+            // Zeit vorhanden → anzeigen
             h.textViewArbeitszeit.setText(headerItem.getArbeitszeit());
             h.textViewArbeitszeit.setTextColor(
                     h.itemView.getContext().getColor(R.color.colorTextSecondary));
+            h.textViewArbeitszeit.setVisibility(View.VISIBLE);
         } else if (headerItem.getArbeitszeit() == null) {
+            // Kein Eintrag → komplett ausblenden
             h.textViewArbeitszeit.setText("");
+            h.textViewArbeitszeit.setVisibility(View.GONE);
         } else {
+            // Eintrag vorhanden, aber keine Zeit → Placeholder
             h.textViewArbeitszeit.setText(
                     h.itemView.getContext().getString(R.string.placeholder_arbeitszeit));
             h.textViewArbeitszeit.setTextColor(
                     h.itemView.getContext().getColor(R.color.colorAccent));
+            h.textViewArbeitszeit.setVisibility(View.VISIBLE);
         }
 
         h.buttonTagEintrag.setOnClickListener(v -> {
@@ -114,6 +120,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             }
         });
     }
+
 
     @SuppressLint("SetTextI18n")
     private void bindEintrag(EintragViewHolder h, int position) {

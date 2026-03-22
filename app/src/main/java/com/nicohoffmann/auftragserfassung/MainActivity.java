@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
     // ====================================
 
     private String berechneTagsArbeitszeit(List<Eintrag> tagEintraege) {
-        if (tagEintraege.isEmpty()) return "";
+        if (tagEintraege.isEmpty()) return null; // null = kein Eintrag vorhanden
         String fruehsteVon = tagEintraege.stream()
                 .map(Eintrag::getZeitVon)
                 .filter(z -> z != null && !z.isEmpty())
@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                 .filter(z -> z != null && !z.isEmpty())
                 .max(Comparator.naturalOrder())
                 .orElse(null);
-        if (fruehsteVon == null || spaetesteBis == null) return null;
+        if (fruehsteVon == null || spaetesteBis == null) return ""; // "" = Eintrag da, aber keine Zeit
         return fruehsteVon + " – " + spaetesteBis;
     }
 
