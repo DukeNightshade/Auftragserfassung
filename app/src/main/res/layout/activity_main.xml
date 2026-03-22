@@ -7,7 +7,6 @@
     android:background="@color/colorBackground"
     android:fitsSystemWindows="true">
 
-    <!-- Hauptinhalt -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -22,6 +21,7 @@
             android:paddingBottom="8dp"
             android:elevation="4dp">
 
+            <!-- Logo + Suchleiste -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -39,15 +39,17 @@
                     android:layout_marginEnd="12dp"
                     app:tint="@color/colorPrimary" />
 
-            <SearchView
-                android:id="@+id/searchView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:iconifiedByDefault="false"
-                android:queryHint="@string/hint_suche" />
+                <SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:iconifiedByDefault="false"
+                    android:queryHint="@string/hint_suche" />
 
             </LinearLayout>
 
+            <!-- Wochennavigation -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -87,14 +89,18 @@
                         android:textSize="12sp"
                         android:textColor="@color/colorTextSecondary" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonAktuelleWoche"
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="4dp"
                         android:text="@string/button_aktuelle_woche"
                         android:textSize="11sp"
                         android:textColor="@color/colorPrimary"
-                        style="@style/Widget.Material3.Button.TextButton" />
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="@color/colorPrimary" />
 
                 </LinearLayout>
 
@@ -109,11 +115,13 @@
 
             </LinearLayout>
 
+            <!-- Ansicht-Toggle -->
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/toggleAnsicht"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="8dp"
                 app:singleSelection="true"
@@ -121,16 +129,18 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonWochenansicht"
-                    android:layout_width="120dp"
+                    android:layout_width="0dp"
                     android:layout_height="36dp"
+                    android:layout_weight="1"
                     android:text="@string/ansicht_woche"
                     android:textSize="13sp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonMonatsansicht"
-                    android:layout_width="120dp"
+                    android:layout_width="0dp"
                     android:layout_height="36dp"
+                    android:layout_weight="1"
                     android:text="@string/ansicht_monat"
                     android:textSize="13sp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
@@ -198,17 +208,18 @@
 
     </LinearLayout>
 
-    <!-- FABs schweben über dem Inhalt -->
+    <!-- FAB Baustellen links -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabBaustellen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="88dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_location" />
 
+    <!-- FAB Neuer Eintrag rechts -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabNeuerEintrag"
         android:layout_width="wrap_content"
