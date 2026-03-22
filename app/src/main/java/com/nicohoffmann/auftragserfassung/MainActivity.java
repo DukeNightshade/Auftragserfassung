@@ -187,25 +187,27 @@ public class MainActivity extends AppCompatActivity {
             wochenEintraege.put(tagName, eintragsTexte);
         }
 
-        // Montag der aktuellen Woche als Date-Objekt
         Date wochenstart = java.sql.Date.valueOf(aktuellerMontag.toString());
+        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            try {
-                WeeklyPdfGenerator generator = new WeeklyPdfGenerator(this);
-                generator.generateWeeklyPdf(wochenstart, wochenEintraege);
-
-                runOnUiThread(() ->
-                        Toast.makeText(this, "PDF wurde in Downloads gespeichert ✓", Toast.LENGTH_LONG).show()
-                );
-            } catch (Exception e) {
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
-            }
-        });
+            executor.execute(() -> {
+                try {
+                    WeeklyPdfGenerator generator = new WeeklyPdfGenerator(this);
+                    generator.generateWeeklyPdf(wochenstart, wochenEintraege);
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "PDF wurde in Downloads gespeichert ✓", Toast.LENGTH_LONG).show()
+                    );
+                } catch (Exception e) {
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                    );
+                } finally {
+                    executor.shutdown();
+                }
+            });
+        }
     }
+
 
     // ====================================
     // Detail Dialog

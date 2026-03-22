@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
@@ -185,9 +186,14 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     // Arbeitszeit Dialog
     // ====================================
 
+    @SuppressLint("SetTextI18n")
     private void zeigeArbeitszeitDialog(android.content.Context context, String rawDatum) {
         BottomSheetDialog dialog = new BottomSheetDialog(context);
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_arbeitszeit, null);
+        View view = LayoutInflater.from(context).inflate(
+                R.layout.dialog_arbeitszeit,
+                (ViewGroup) Objects.requireNonNull(dialog.getWindow()).getDecorView(),
+                false
+        );
 
         Button buttonVon = view.findViewById(R.id.buttonVon);
         Button buttonBis = view.findViewById(R.id.buttonBis);
@@ -198,7 +204,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         LocalTime[] zeitVon = {null};
         LocalTime[] zeitBis = {null};
 
-        Runnable berechne = () -> {
+        @SuppressLint("SetTextI18n") Runnable berechne = () -> {
             if (zeitVon[0] != null && zeitBis[0] != null) {
                 long gesamtMin = Duration.between(zeitVon[0], zeitBis[0]).toMinutes();
                 int pause = 0;
