@@ -11,7 +11,7 @@
     <string name="label_baustelle">Baustelle</string>
     <string name="label_beschreibung">Beschreibung</string>
     <string name="placeholder_zeit">--:--</string>
-    <string name="label_pause">Pause: %d min</string>
+    <string name="label_pause">Pausenzeit</string>
     <string name="fehler_zeit">Bitte Von- und Bis-Zeit angeben</string>
     <string name="hint_suche">Einträge suchen…</string>
     <string name="label_mehr">…</string>
@@ -41,4 +41,11 @@
     <string name="label_mehr_anzahl">+ %1$d weitere Einträge anzeigen</string>
     <string name="title_baustellen">Baustellen</string>
     <string name="placeholder_arbeitszeit">Arbeitszeit eintragen</string>
+    <string name="dialog_titel_arbeitszeit">Arbeitszeit</string>
+    <string name="label_selber_eintragen">Selber eintragen</string>
+    <string name="label_automatisch_berechnet">Automatisch berechnet</string>
+    <string name="label_arbeitsstunden">Arbeitsstunden</string>
+    <string name="button_von_placeholder">Von: —:—</string>
+    <string name="button_bis_placeholder">Bis: —:—</string>
+    <string name="trennzeichen_bis">–</string>
 </resources>

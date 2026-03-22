@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_titel_arbeitszeit"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorOnSurface"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Selber eintragen -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_selber_eintragen"
+        android:textSize="12sp"
+        android:textColor="@color/colorTextSecondary"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/buttonVon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_von_placeholder" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/trennzeichen_bis"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@color/colorOnSurface" />
+
+        <Button
+            android:id="@+id/buttonBis"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_bis_placeholder" />
+
+    </LinearLayout>
+
+    <!-- Automatisch berechnet -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_automatisch_berechnet"
+        android:textSize="12sp"
+        android:textColor="@color/colorTextSecondary"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_pause"
+                android:textSize="12sp"
+                android:textColor="@color/colorTextSecondary" />
+
+            <TextView
+                android:id="@+id/textViewPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/trennzeichen_bis"
+                android:textSize="16sp"
+                android:textColor="@color/colorOnSurface" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_arbeitsstunden"
+                android:textSize="12sp"
+                android:textColor="@color/colorTextSecondary" />
+
+            <TextView
+                android:id="@+id/textViewArbeitsstunden"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/trennzeichen_bis"
+                android:textSize="16sp"
+                android:textColor="@color/colorOnSurface" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonSpeichernArbeitszeit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_speichern" />
+
+</LinearLayout>
