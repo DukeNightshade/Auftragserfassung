@@ -89,18 +89,39 @@
                         android:textSize="12sp"
                         android:textColor="@color/colorTextSecondary" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonAktuelleWoche"
+                    <!-- Aktuelle Woche + Drucken nebeneinander ── -->
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="36dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/button_aktuelle_woche"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorPrimary"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        app:strokeColor="@color/colorPrimary" />
+                        android:layout_marginTop="4dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonAktuelleWoche"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="@string/button_aktuelle_woche"
+                            android:textSize="11sp"
+                            android:textColor="@color/colorPrimary"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            app:strokeColor="@color/colorPrimary" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonDrucken"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="@string/button_drucken"
+                            android:textSize="11sp"
+                            android:textColor="@color/colorPrimary"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            app:strokeColor="@color/colorPrimary" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

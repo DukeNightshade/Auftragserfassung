@@ -9,6 +9,9 @@ activity = "1.13.0"
 constraintlayout = "2.2.1"
 roomRuntime = "2.8.4"
 roomCompiler = "2.8.4"
+itext7Core = "9.2.0"
+itext7CoreAndroid = "9.2.0"
+uiTextGoogleFonts = "1.10.5"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -20,6 +23,9 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+itext7-core = { group = "com.itextpdf", name = "itext7-core", version = "9.5.0" }
+itext7-core-android = { group = "com.itextpdf.android", name = "itext7-core-android", version = "9.5.0" }
+ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

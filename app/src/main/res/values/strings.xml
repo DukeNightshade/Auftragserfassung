@@ -48,4 +48,5 @@
     <string name="button_von_placeholder">Von: —:—</string>
     <string name="button_bis_placeholder">Bis: —:—</string>
     <string name="trennzeichen_bis">–</string>
+    <string name="button_drucken">Drucken</string>
 </resources>

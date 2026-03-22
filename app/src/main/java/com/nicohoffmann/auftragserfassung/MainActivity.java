@@ -9,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
+import com.nicohoffmann.auftragserfassung.util.WeeklyPdfGenerator;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -27,6 +29,8 @@ import java.time.format.TextStyle;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -113,6 +117,10 @@ public class MainActivity extends AppCompatActivity {
         buttonNaechsteWoche.setOnClickListener(v -> navigiereVor());
         buttonAktuelleWoche.setOnClickListener(v -> zurueckZurAktuellenAnsicht());
 
+        // ── NEU: Print Button ──
+        Button buttonDrucken = findViewById(R.id.buttonDrucken);
+        buttonDrucken.setOnClickListener(v -> generiereWochenPdf());
+
         MaterialButtonToggleGroup toggleAnsicht = findViewById(R.id.toggleAnsicht);
         toggleAnsicht.check(R.id.buttonWochenansicht);
         toggleAnsicht.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -157,6 +165,51 @@ public class MainActivity extends AppCompatActivity {
 
         aktualisiereAnsicht();
     }
+
+    // ====================================
+    // PDF Methods
+    // ====================================
+
+    private void generiereWochenPdf() {
+        Map<String, List<String>> wochenEintraege = new HashMap<>();
+        String[] wochentage = {"Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"};
+
+        for (int i = 0; i < 7; i++) {
+            LocalDate tag = aktuellerMontag.plusDays(i);
+            String datum = tag.format(DB_DATUM_FORMAT);
+            String tagName = wochentage[i];
+
+            List<String> eintragsTexte = alleEintraege.stream()
+                    .filter(e -> e.getDatum().equals(datum))
+                    .map(e -> findebaustellenName(e) + " – " + e.getBeschreibung())
+                    .collect(Collectors.toList());
+
+            wochenEintraege.put(tagName, eintragsTexte);
+        }
+
+        // Montag der aktuellen Woche als Date-Objekt
+        Date wochenstart = java.sql.Date.valueOf(aktuellerMontag.toString());
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            try {
+                WeeklyPdfGenerator generator = new WeeklyPdfGenerator(this);
+                generator.generateWeeklyPdf(wochenstart, wochenEintraege);
+
+                runOnUiThread(() ->
+                        Toast.makeText(this, "PDF wurde in Downloads gespeichert ✓", Toast.LENGTH_LONG).show()
+                );
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
+            }
+        });
+    }
+
+    // ====================================
+    // Detail Dialog
+    // ====================================
 
     private void zeigeEintragDetail(EintraegeAdapter.EintragItem item) {
         BottomSheetDialog dialog = new BottomSheetDialog(this);
@@ -375,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
     // ====================================
 
     private String berechneTagsArbeitszeit(List<Eintrag> tagEintraege) {
-        if (tagEintraege.isEmpty()) return null; // null = kein Eintrag vorhanden
+        if (tagEintraege.isEmpty()) return null;
         String fruehsteVon = tagEintraege.stream()
                 .map(Eintrag::getZeitVon)
                 .filter(z -> z != null && !z.isEmpty())
@@ -386,10 +439,9 @@ public class MainActivity extends AppCompatActivity {
                 .filter(z -> z != null && !z.isEmpty())
                 .max(Comparator.naturalOrder())
                 .orElse(null);
-        if (fruehsteVon == null || spaetesteBis == null) return ""; // "" = Eintrag da, aber keine Zeit
+        if (fruehsteVon == null || spaetesteBis == null) return "";
         return fruehsteVon + " – " + spaetesteBis;
     }
-
 
     private String findebaustellenName(Eintrag e) {
         return alleBaustellen.stream()
