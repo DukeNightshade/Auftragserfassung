@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private static final DateTimeFormatter DATUM_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter MONAT_FORMAT = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.GERMAN);
     private static final DateTimeFormatter DB_DATUM_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter ANZEIGE_DATUM_FORMAT = DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN);
 
     // ====================================
     // Instance Variables
@@ -89,49 +90,8 @@ public class MainActivity extends AppCompatActivity {
         eintraegeAdapter = new EintraegeAdapter(new ArrayList<>());
         recyclerViewEintraege.setAdapter(eintraegeAdapter);
 
-        eintraegeAdapter.setOnEintragClickListener(item -> {
-            BottomSheetDialog dialog = new BottomSheetDialog(this);
-            View view = LayoutInflater.from(this).inflate(
-                    R.layout.dialog_eintrag_detail,
-                    dialog.findViewById(android.R.id.content),
-                    false
-            );
+        eintraegeAdapter.setOnEintragClickListener(this::zeigeEintragDetail);
 
-            ((TextView) view.findViewById(R.id.detailBaustelle)).setText(item.getBaustelleName());
-            ((TextView) view.findViewById(R.id.detailDatum)).setText(
-                    getString(R.string.detail_datum, item.getEintrag().getDatum()));
-            ((TextView) view.findViewById(R.id.detailZeit)).setText(
-                    getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
-            ((TextView) view.findViewById(R.id.detailBeschreibung)).setText(item.getEintrag().getBeschreibung());
-
-            view.findViewById(R.id.buttonLoeschen).setOnClickListener(v ->
-                    new androidx.appcompat.app.AlertDialog.Builder(this)
-                            .setTitle(R.string.dialog_loeschen_titel)
-                            .setMessage(R.string.dialog_loeschen_nachricht)
-                            .setPositiveButton(R.string.button_loeschen, (d, w) -> {
-                                try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-                                    executor.execute(() ->
-                                            AppDatabase.getInstance(this).eintragDao().delete(item.getEintrag())
-                                    );
-                                }
-                                dialog.dismiss();
-                            })
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show()
-            );
-
-            view.findViewById(R.id.buttonAendern).setOnClickListener(v -> {
-                Intent intent = new Intent(this, NeuerEintragActivity.class);
-                intent.putExtra(NeuerEintragActivity.EXTRA_EINTRAG_ID, item.getEintrag().getId());
-                startActivity(intent);
-                dialog.dismiss();
-            });
-
-            dialog.setContentView(view);
-            dialog.show();
-        });
-
-        // Tag-+ Button Listener
         eintraegeAdapter.setOnTagEintragClickListener(datum -> {
             Intent intent = new Intent(this, NeuerEintragActivity.class);
             intent.putExtra(NeuerEintragActivity.EXTRA_DATUM, datum);
@@ -198,8 +158,50 @@ public class MainActivity extends AppCompatActivity {
         aktualisiereAnsicht();
     }
 
+    private void zeigeEintragDetail(EintraegeAdapter.EintragItem item) {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(
+                R.layout.dialog_eintrag_detail,
+                dialog.findViewById(android.R.id.content),
+                false
+        );
+
+        ((TextView) view.findViewById(R.id.detailBaustelle)).setText(item.getBaustelleName());
+        ((TextView) view.findViewById(R.id.detailDatum)).setText(
+                getString(R.string.detail_datum, item.getEintrag().getDatum()));
+        ((TextView) view.findViewById(R.id.detailZeit)).setText(
+                getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
+        ((TextView) view.findViewById(R.id.detailBeschreibung)).setText(item.getEintrag().getBeschreibung());
+
+        view.findViewById(R.id.buttonLoeschen).setOnClickListener(v ->
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_loeschen_titel)
+                        .setMessage(R.string.dialog_loeschen_nachricht)
+                        .setPositiveButton(R.string.button_loeschen, (d, w) -> {
+                            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+                                executor.execute(() ->
+                                        AppDatabase.getInstance(this).eintragDao().delete(item.getEintrag())
+                                );
+                            }
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+        );
+
+        view.findViewById(R.id.buttonAendern).setOnClickListener(v -> {
+            Intent intent = new Intent(this, NeuerEintragActivity.class);
+            intent.putExtra(NeuerEintragActivity.EXTRA_EINTRAG_ID, item.getEintrag().getId());
+            startActivity(intent);
+            dialog.dismiss();
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
     // ====================================
-    // Utility Methods
+    // Navigation Methods
     // ====================================
 
     private void navigiereZurueck() {
@@ -225,6 +227,10 @@ public class MainActivity extends AppCompatActivity {
         aktuellerMonat = YearMonth.now();
         aktualisiereAnsicht();
     }
+
+    // ====================================
+    // Ansicht Methods
+    // ====================================
 
     private void aktualisiereAnsicht() {
         if (!aktuellerSuchtext.isEmpty()) {
@@ -270,21 +276,18 @@ public class MainActivity extends AppCompatActivity {
                 .distinct()
                 .forEach(datum -> {
                     LocalDate localDate = LocalDate.parse(datum, DB_DATUM_FORMAT);
-                    items.add(new EintraegeAdapter.HeaderItem(
-                            localDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMAN),
-                            localDate.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN)),
-                            datum
-                    ));
-
                     List<Eintrag> tagesEintraege = Objects.requireNonNullElse(
                             gruppiertNachTag.get(datum), new ArrayList<>());
+
+                    items.add(new EintraegeAdapter.HeaderItem(
+                            localDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMAN),
+                            localDate.format(ANZEIGE_DATUM_FORMAT),
+                            datum,
+                            berechneTagsArbeitszeit(tagesEintraege)
+                    ));
+
                     for (Eintrag e : tagesEintraege) {
-                        String baustelleName = alleBaustellen.stream()
-                                .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
-                                .map(Baustelle::getName)
-                                .findFirst()
-                                .orElse("");
-                        items.add(new EintraegeAdapter.EintragItem(e, baustelleName));
+                        items.add(new EintraegeAdapter.EintragItem(e, findebaustellenName(e)));
                     }
                 });
 
@@ -315,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < startOffset; i++) {
             tage.add(null);
         }
-
         for (int i = 1; i <= aktuellerMonat.lengthOfMonth(); i++) {
             tage.add(aktuellerMonat.atDay(i));
         }
@@ -327,7 +329,6 @@ public class MainActivity extends AppCompatActivity {
     private void onKalenderTagGeklickt(LocalDate datum) {
         aktuellerMontag = datum.with(DayOfWeek.MONDAY);
         istMonatsansicht = false;
-
         MaterialButtonToggleGroup toggle = findViewById(R.id.toggleAnsicht);
         toggle.check(R.id.buttonWochenansicht);
     }
@@ -343,25 +344,22 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 7; i++) {
             LocalDate tag = aktuellerMontag.plusDays(i);
             String datum = tag.format(DB_DATUM_FORMAT);
-            String tagName = tag.getDayOfWeek()
-                    .getDisplayName(TextStyle.FULL, Locale.GERMAN);
+            String tagName = tag.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMAN);
 
             List<Eintrag> tagEintraege = Objects.requireNonNullElse(
-                    gruppiertNachTag.get(datum), new ArrayList<>()
-            );
+                    gruppiertNachTag.get(datum), new ArrayList<>());
 
-            String datumAnzeige = tag.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN));
-            items.add(new EintraegeAdapter.HeaderItem(tagName, datumAnzeige, datum));
+            items.add(new EintraegeAdapter.HeaderItem(
+                    tagName,
+                    tag.format(ANZEIGE_DATUM_FORMAT),
+                    datum,
+                    berechneTagsArbeitszeit(tagEintraege)
+            ));
 
             int anzahl = Math.min(tagEintraege.size(), MAX_EINTRAEGE_PRO_TAG);
             for (int j = 0; j < anzahl; j++) {
                 Eintrag e = tagEintraege.get(j);
-                String baustelleName = alleBaustellen.stream()
-                        .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
-                        .map(Baustelle::getName)
-                        .findFirst()
-                        .orElse("");
-                items.add(new EintraegeAdapter.EintragItem(e, baustelleName));
+                items.add(new EintraegeAdapter.EintragItem(e, findebaustellenName(e)));
             }
 
             if (tagEintraege.size() > MAX_EINTRAEGE_PRO_TAG) {
@@ -370,5 +368,34 @@ public class MainActivity extends AppCompatActivity {
         }
 
         eintraegeAdapter.setItems(items);
+    }
+
+    // ====================================
+    // Utility Methods
+    // ====================================
+
+    private String berechneTagsArbeitszeit(List<Eintrag> tagEintraege) {
+        if (tagEintraege.isEmpty()) return "";
+        String fruehsteVon = tagEintraege.stream()
+                .map(Eintrag::getZeitVon)
+                .filter(z -> z != null && !z.isEmpty())
+                .min(Comparator.naturalOrder())
+                .orElse(null);
+        String spaetesteBis = tagEintraege.stream()
+                .map(Eintrag::getZeitBis)
+                .filter(z -> z != null && !z.isEmpty())
+                .max(Comparator.naturalOrder())
+                .orElse(null);
+        if (fruehsteVon == null || spaetesteBis == null) return null;
+        return fruehsteVon + " – " + spaetesteBis;
+    }
+
+
+    private String findebaustellenName(Eintrag e) {
+        return alleBaustellen.stream()
+                .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
+                .map(Baustelle::getName)
+                .findFirst()
+                .orElse("");
     }
 }

@@ -40,4 +40,5 @@
     <string name="placeholder_datum">Datum wählen</string>
     <string name="label_mehr_anzahl">+ %1$d weitere Einträge anzeigen</string>
     <string name="title_baustellen">Baustellen</string>
+    <string name="placeholder_arbeitszeit">Arbeitszeit eintragen</string>
 </resources>

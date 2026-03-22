@@ -94,6 +94,20 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         HeaderItem headerItem = (HeaderItem) items.get(position);
         h.textView.setText(headerItem.getTag());
         h.textViewDatum.setText(headerItem.getDatum());
+
+        if (headerItem.getArbeitszeit() != null && !headerItem.getArbeitszeit().isEmpty()) {
+            h.textViewArbeitszeit.setText(headerItem.getArbeitszeit());
+            h.textViewArbeitszeit.setTextColor(
+                    h.itemView.getContext().getColor(R.color.colorTextSecondary));
+        } else if (headerItem.getArbeitszeit() == null) {
+            h.textViewArbeitszeit.setText("");
+        } else {
+            h.textViewArbeitszeit.setText(
+                    h.itemView.getContext().getString(R.string.placeholder_arbeitszeit));
+            h.textViewArbeitszeit.setTextColor(
+                    h.itemView.getContext().getColor(R.color.colorAccent));
+        }
+
         h.buttonTagEintrag.setOnClickListener(v -> {
             if (tagEintragListener != null) {
                 tagEintragListener.onTagEintragClick(headerItem.getRawDatum());
@@ -165,7 +179,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     // ====================================
-    // Inner Classes / Interfaces
+    // Interfaces
     // ====================================
 
     public interface OnEintragClickListener {
@@ -178,20 +192,27 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public interface ListItem {}
 
+    // ====================================
+    // Inner Classes
+    // ====================================
+
     public static class HeaderItem implements ListItem {
         private final String tag;
         private final String datum;
         private final String rawDatum;
+        private final String arbeitszeit;
 
-        public HeaderItem(String tag, String datum, String rawDatum) {
+        public HeaderItem(String tag, String datum, String rawDatum, String arbeitszeit) {
             this.tag = tag;
             this.datum = datum;
             this.rawDatum = rawDatum;
+            this.arbeitszeit = arbeitszeit;
         }
 
         public String getTag() { return tag; }
         public String getDatum() { return datum; }
         public String getRawDatum() { return rawDatum; }
+        public String getArbeitszeit() { return arbeitszeit; }
     }
 
     public static class EintragItem implements ListItem {
@@ -230,12 +251,14 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
         TextView textViewDatum;
+        TextView textViewArbeitszeit;
         MaterialButton buttonTagEintrag;
 
         HeaderViewHolder(View v) {
             super(v);
             textView = v.findViewById(R.id.textViewTagHeader);
             textViewDatum = v.findViewById(R.id.textViewTagDatum);
+            textViewArbeitszeit = v.findViewById(R.id.textViewTagArbeitszeit);
             buttonTagEintrag = v.findViewById(R.id.buttonTagEintrag);
         }
     }
