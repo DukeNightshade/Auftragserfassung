@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_marginTop="12dp">
 
-    <!-- Trennlinie oben -->
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
@@ -17,25 +17,59 @@
         android:orientation="horizontal"
         android:background="@color/colorSurface"
         android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingEnd="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:gravity="center_vertical">
 
+        <!-- Tagesname -->
         <TextView
             android:id="@+id/textViewTagHeader"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@color/colorOnSurface" />
 
+        <!-- Arbeitszeit -->
+        <TextView
+            android:id="@+id/textViewTagArbeitszeit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/colorTextSecondary"
+            android:layout_marginStart="8dp" />
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Datum -->
         <TextView
             android:id="@+id/textViewTagDatum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="13sp"
-            android:textColor="@color/colorOnSurface" />
+            android:textColor="@color/colorTextSecondary"
+            android:layout_marginEnd="8dp" />
+
+        <!-- + Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonTagEintrag"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="0dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconSize="18dp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:strokeColor="@color/colorPrimary"
+            android:textColor="@color/colorPrimary"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
     </LinearLayout>
 

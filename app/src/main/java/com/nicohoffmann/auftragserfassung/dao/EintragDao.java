@@ -27,6 +27,10 @@ public interface EintragDao {
     @Query("SELECT * FROM eintraege WHERE id = :id LIMIT 1")
     Eintrag getById(int id);
 
+    @Query("SELECT * FROM eintraege WHERE datum = :datum")
+    List<Eintrag> getEintraegeByDatum(String datum);
+
+
     // ====================================
     // Utility Methods
     // ====================================

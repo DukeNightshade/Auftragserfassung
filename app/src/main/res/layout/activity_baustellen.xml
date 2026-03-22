@@ -39,7 +39,17 @@
 
     </LinearLayout>
 
-    <!-- FAB schwebt über dem Inhalt -->
+    <!-- FAB Zurück unten links -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabZurueck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_arrow_back" />
+
+    <!-- FAB Hinzufügen unten rechts -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabBaustelleHinzufuegen"
         android:layout_width="wrap_content"

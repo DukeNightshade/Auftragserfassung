@@ -64,6 +64,9 @@ public class BaustellenActivity extends AppCompatActivity {
 
         FloatingActionButton fab = findViewById(R.id.fabBaustelleHinzufuegen);
         fab.setOnClickListener(v -> zeigeHinzufuegenDialog(db));
+
+        FloatingActionButton fabZurueck = findViewById(R.id.fabZurueck);
+        fabZurueck.setOnClickListener(v -> finish());
     }
 
     // ====================================
