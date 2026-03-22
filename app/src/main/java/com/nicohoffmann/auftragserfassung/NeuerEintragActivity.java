@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
@@ -61,6 +62,10 @@ public class NeuerEintragActivity extends AppCompatActivity {
         spinnerBaustelle = findViewById(R.id.spinnerBaustelle);
         editTextBeschreibung = findViewById(R.id.editTextBeschreibung);
 
+        // ✅ Zurück-FAB
+        FloatingActionButton fabZurueck = findViewById(R.id.fabZurueck);
+        fabZurueck.setOnClickListener(v -> finish());
+
         gewaehltesDatum = LocalDate.now();
         buttonDatum.setText(gewaehltesDatum.format(DATUM_FORMAT));
         buttonDatum.setOnClickListener(v -> zeigDatumPicker());
@@ -78,6 +83,12 @@ public class NeuerEintragActivity extends AppCompatActivity {
             gewaehltesDatum = LocalDate.parse(extraDatum, DATUM_FORMAT);
             buttonDatum.setText(extraDatum);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executor.shutdown();
     }
 
     private void ladeEintragZumBearbeiten(int id) {
