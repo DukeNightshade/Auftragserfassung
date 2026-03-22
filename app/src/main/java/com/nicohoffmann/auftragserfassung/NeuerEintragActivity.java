@@ -39,6 +39,7 @@ public class NeuerEintragActivity extends AppCompatActivity {
     private static final long GRENZE_MITTEL = 540;
     private static final long GRENZE_KURZ = 360;
     public static final String EXTRA_EINTRAG_ID = "eintrag_id";
+    public static final String EXTRA_DATUM = "datum";
 
     // ====================================
     // Instance Variables
@@ -95,6 +96,12 @@ public class NeuerEintragActivity extends AppCompatActivity {
         if (eintragId != -1) {
             ladeEintragZumBearbeiten(eintragId);
         }
+        String extraDatum = getIntent().getStringExtra(EXTRA_DATUM);
+        if (extraDatum != null) {
+            gewaehltesDatum = LocalDate.parse(extraDatum, DATUM_FORMAT);
+            buttonDatum.setText(extraDatum);
+        }
+
     }
 
     private void ladeEintragZumBearbeiten(int id) {

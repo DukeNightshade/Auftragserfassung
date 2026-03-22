@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
         eintraegeAdapter = new EintraegeAdapter(new ArrayList<>());
         recyclerViewEintraege.setAdapter(eintraegeAdapter);
 
-        // BottomSheet bei Eintrag-Klick
         eintraegeAdapter.setOnEintragClickListener(item -> {
             BottomSheetDialog dialog = new BottomSheetDialog(this);
             View view = LayoutInflater.from(this).inflate(
@@ -105,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     getString(R.string.detail_zeit, item.getEintrag().getZeitVon(), item.getEintrag().getZeitBis()));
             ((TextView) view.findViewById(R.id.detailBeschreibung)).setText(item.getEintrag().getBeschreibung());
 
-            // Löschen
             view.findViewById(R.id.buttonLoeschen).setOnClickListener(v ->
                     new androidx.appcompat.app.AlertDialog.Builder(this)
                             .setTitle(R.string.dialog_loeschen_titel)
@@ -122,9 +120,6 @@ public class MainActivity extends AppCompatActivity {
                             .show()
             );
 
-
-
-            // Ändern
             view.findViewById(R.id.buttonAendern).setOnClickListener(v -> {
                 Intent intent = new Intent(this, NeuerEintragActivity.class);
                 intent.putExtra(NeuerEintragActivity.EXTRA_EINTRAG_ID, item.getEintrag().getId());
@@ -136,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
             dialog.show();
         });
 
+        // Tag-+ Button Listener
+        eintraegeAdapter.setOnTagEintragClickListener(datum -> {
+            Intent intent = new Intent(this, NeuerEintragActivity.class);
+            intent.putExtra(NeuerEintragActivity.EXTRA_DATUM, datum);
+            startActivity(intent);
+        });
 
         recyclerViewKalender = findViewById(R.id.recyclerViewKalender);
         recyclerViewKalender.setLayoutManager(new GridLayoutManager(this, 7));
@@ -226,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void aktualisiereAnsicht() {
-        // Suche aktiv → eigene Suchergebnisliste, unabhängig von Ansicht
         if (!aktuellerSuchtext.isEmpty()) {
             recyclerViewEintraege.setVisibility(View.VISIBLE);
             recyclerViewKalender.setVisibility(View.GONE);
@@ -269,14 +269,15 @@ public class MainActivity extends AppCompatActivity {
                 .map(Eintrag::getDatum)
                 .distinct()
                 .forEach(datum -> {
-                    // Datum als lesbarer Header: "21.03.2025"
                     LocalDate localDate = LocalDate.parse(datum, DB_DATUM_FORMAT);
                     items.add(new EintraegeAdapter.HeaderItem(
                             localDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.GERMAN),
-                            localDate.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN))
+                            localDate.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN)),
+                            datum
                     ));
 
-                    List<Eintrag> tagesEintraege = Objects.requireNonNullElse(gruppiertNachTag.get(datum), new ArrayList<>());
+                    List<Eintrag> tagesEintraege = Objects.requireNonNullElse(
+                            gruppiertNachTag.get(datum), new ArrayList<>());
                     for (Eintrag e : tagesEintraege) {
                         String baustelleName = alleBaustellen.stream()
                                 .filter(b -> b.getId() == (e.getBaustelleId() != null ? e.getBaustelleId() : -1))
@@ -350,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
             );
 
             String datumAnzeige = tag.format(DateTimeFormatter.ofPattern("dd.MM.", Locale.GERMAN));
-            items.add(new EintraegeAdapter.HeaderItem(tagName, datumAnzeige));
+            items.add(new EintraegeAdapter.HeaderItem(tagName, datumAnzeige, datum));
 
             int anzahl = Math.min(tagEintraege.size(), MAX_EINTRAEGE_PRO_TAG);
             for (int j = 0; j < anzahl; j++) {

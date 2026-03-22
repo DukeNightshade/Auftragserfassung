@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
 import java.util.List;
@@ -35,6 +36,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private List<ListItem> items;
     private OnEintragClickListener clickListener;
+    private OnTagEintragClickListener tagEintragListener;
 
     // ====================================
     // Constructors
@@ -79,11 +81,24 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @Override
+    public int getItemCount() {
+        return items != null ? items.size() : 0;
+    }
+
+    // ====================================
+    // Bind Methods
+    // ====================================
+
     private void bindHeader(HeaderViewHolder h, int position) {
         HeaderItem headerItem = (HeaderItem) items.get(position);
         h.textView.setText(headerItem.getTag());
         h.textViewDatum.setText(headerItem.getDatum());
+        h.buttonTagEintrag.setOnClickListener(v -> {
+            if (tagEintragListener != null) {
+                tagEintragListener.onTagEintragClick(headerItem.getRawDatum());
+            }
+        });
     }
 
     @SuppressLint("SetTextI18n")
@@ -131,12 +146,6 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         notifyItemRangeInserted(pos, tagesEintraege.size() - MAX_EINTRAEGE_PRO_TAG);
     }
 
-
-    @Override
-    public int getItemCount() {
-        return items != null ? items.size() : 0;
-    }
-
     // ====================================
     // Utility Methods
     // ====================================
@@ -151,6 +160,10 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         this.clickListener = listener;
     }
 
+    public void setOnTagEintragClickListener(OnTagEintragClickListener listener) {
+        this.tagEintragListener = listener;
+    }
+
     // ====================================
     // Inner Classes / Interfaces
     // ====================================
@@ -159,19 +172,26 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onEintragClick(EintragItem item);
     }
 
+    public interface OnTagEintragClickListener {
+        void onTagEintragClick(String datum);
+    }
+
     public interface ListItem {}
 
     public static class HeaderItem implements ListItem {
         private final String tag;
         private final String datum;
+        private final String rawDatum;
 
-        public HeaderItem(String tag, String datum) {
+        public HeaderItem(String tag, String datum, String rawDatum) {
             this.tag = tag;
             this.datum = datum;
+            this.rawDatum = rawDatum;
         }
 
         public String getTag() { return tag; }
         public String getDatum() { return datum; }
+        public String getRawDatum() { return rawDatum; }
     }
 
     public static class EintragItem implements ListItem {
@@ -203,13 +223,20 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         public List<Baustelle> getAlleBaustellen() { return alleBaustellen; }
     }
 
+    // ====================================
+    // ViewHolders
+    // ====================================
+
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
         TextView textViewDatum;
+        MaterialButton buttonTagEintrag;
+
         HeaderViewHolder(View v) {
             super(v);
             textView = v.findViewById(R.id.textViewTagHeader);
             textViewDatum = v.findViewById(R.id.textViewTagDatum);
+            buttonTagEintrag = v.findViewById(R.id.buttonTagEintrag);
         }
     }
 
@@ -217,6 +244,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TextView textViewZeit;
         TextView textViewBaustelle;
         TextView textViewBeschreibung;
+
         EintragViewHolder(View v) {
             super(v);
             textViewZeit = v.findViewById(R.id.textViewZeit);
@@ -227,6 +255,7 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     static class MehrViewHolder extends RecyclerView.ViewHolder {
         TextView textViewMehr;
+
         MehrViewHolder(View v) {
             super(v);
             textViewMehr = v.findViewById(R.id.textViewMehr);
