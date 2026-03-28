@@ -1,7 +1,6 @@
 package com.nicohoffmann.auftragserfassung;
 
 import android.annotation.SuppressLint;
-import android.app.TimePickerDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
@@ -220,20 +221,38 @@ public class EintraegeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         buttonVon.setOnClickListener(v -> {
             LocalTime jetzt = LocalTime.now();
-            new TimePickerDialog(context, (tp, h, m) -> {
-                zeitVon[0] = LocalTime.of(h, m);
+            MaterialTimePicker picker = new MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_24H)
+                    .setHour(jetzt.getHour())
+                    .setMinute(jetzt.getMinute())
+                    .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
+                    .setTitleText("Von")
+                    .build();
+            picker.addOnPositiveButtonClickListener(btn -> {
+                zeitVon[0] = LocalTime.of(picker.getHour(), picker.getMinute());
                 buttonVon.setText("Von: " + zeitVon[0].format(ZEIT_FORMAT));
                 berechne.run();
-            }, jetzt.getHour(), jetzt.getMinute(), true).show();
+            });
+            picker.show(((androidx.fragment.app.FragmentActivity) context)
+                    .getSupportFragmentManager(), "picker_von");
         });
 
         buttonBis.setOnClickListener(v -> {
             LocalTime jetzt = LocalTime.now();
-            new TimePickerDialog(context, (tp, h, m) -> {
-                zeitBis[0] = LocalTime.of(h, m);
+            MaterialTimePicker picker = new MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_24H)
+                    .setHour(jetzt.getHour())
+                    .setMinute(jetzt.getMinute())
+                    .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
+                    .setTitleText("Bis")
+                    .build();
+            picker.addOnPositiveButtonClickListener(btn -> {
+                zeitBis[0] = LocalTime.of(picker.getHour(), picker.getMinute());
                 buttonBis.setText("Bis: " + zeitBis[0].format(ZEIT_FORMAT));
                 berechne.run();
-            }, jetzt.getHour(), jetzt.getMinute(), true).show();
+            });
+            picker.show(((androidx.fragment.app.FragmentActivity) context)
+                    .getSupportFragmentManager(), "picker_bis");
         });
 
         buttonSpeichern.setOnClickListener(v -> {
