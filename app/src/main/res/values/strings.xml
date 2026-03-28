@@ -49,4 +49,5 @@
     <string name="button_bis_placeholder">Bis: —:—</string>
     <string name="trennzeichen_bis">–</string>
     <string name="button_drucken">Drucken</string>
+    <string name="button_baustellen">Baustellen</string>
 </resources>

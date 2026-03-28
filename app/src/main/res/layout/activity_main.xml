@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorBackground">
+    android:background="@color/colorBackground"
+    android:fitsSystemWindows="true">
 
     <!-- Header-Bereich -->
     <LinearLayout
@@ -84,7 +85,7 @@
                     android:textSize="12sp"
                     android:textColor="@color/colorTextSecondary" />
 
-                <!-- Aktuelle Woche + Drucken nebeneinander -->
+                <!-- Aktuelle Woche + Drucken + Baustellen nebeneinander -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -115,6 +116,23 @@
                         android:textColor="@color/colorPrimary"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         app:strokeColor="@color/colorPrimary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/fabBaustellen"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/button_baustellen"
+                        android:textSize="11sp"
+                        android:maxLines="1"
+                        android:autoSizeTextType="uniform"
+                        android:autoSizeMinTextSize="7sp"
+                        android:autoSizeMaxTextSize="11sp"
+                        android:autoSizeStepGranularity="1sp"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="@color/colorPrimary"
+                        android:textColor="@color/colorPrimary" />
 
                 </LinearLayout>
 
@@ -222,8 +240,9 @@
         android:padding="4dp"
         android:visibility="gone" />
 
-    <!-- Bottom-Bar mit FABs -->
+    <!-- Bottom-Bar -->
     <LinearLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -233,24 +252,10 @@
         android:paddingBottom="16dp"
         android:background="@color/colorBackground">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabBaustellen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:importantForAccessibility="no"
-            android:src="@drawable/ic_location" />
-
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabNeuerEintrag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:importantForAccessibility="no"
-            android:src="@android:drawable/ic_input_add" />
 
     </LinearLayout>
 

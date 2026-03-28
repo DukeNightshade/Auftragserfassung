@@ -11,12 +11,15 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
@@ -43,7 +46,7 @@ import java.util.stream.Collectors;
  * Hauptaktivität der Anwendung.
  * Zeigt Einträge in Wochen- oder Monatsansicht an.
  * @author Nico Hoffmann
- * @version 1.0
+ * @version 1.1.1
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -83,6 +86,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        LinearLayout bottomBar = findViewById(R.id.bottomBar);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v, insets) -> {
+            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    bottomInset + getResources().getDimensionPixelSize(R.dimen.bottom_bar_padding)
+            );
+            return insets;
+        });
 
         aktuellerMontag = LocalDate.now().with(DayOfWeek.MONDAY);
         aktuellerMonat = YearMonth.now();
@@ -140,12 +157,7 @@ public class MainActivity extends AppCompatActivity {
             aktualisiereAnsicht();
         });
 
-        FloatingActionButton fabNeuerEintrag = findViewById(R.id.fabNeuerEintrag);
-        fabNeuerEintrag.setOnClickListener(v ->
-                startActivity(new Intent(this, NeuerEintragActivity.class))
-        );
-
-        FloatingActionButton fabBaustellen = findViewById(R.id.fabBaustellen);
+        MaterialButton fabBaustellen = findViewById(R.id.fabBaustellen);
         fabBaustellen.setOnClickListener(v ->
                 startActivity(new Intent(this, BaustellenActivity.class))
         );
