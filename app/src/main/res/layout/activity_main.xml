@@ -1,254 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:fitsSystemWindows="true">
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
 
+    <!-- Header-Bereich -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorSurface"
+        android:paddingBottom="8dp"
+        android:elevation="4dp">
 
-        <!-- Header-Bereich -->
+        <!-- Logo + Suchleiste -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/colorSurface"
-            android:paddingBottom="8dp"
-            android:elevation="4dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="16dp">
 
-            <!-- Logo + Suchleiste -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_umbrella"
+                android:layout_marginEnd="12dp"
+                app:tint="@color/colorPrimary" />
+
+            <SearchView
+                android:id="@+id/searchView"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="16dp">
+                android:layout_weight="1"
+                android:iconifiedByDefault="false"
+                android:queryHint="@string/hint_suche" />
 
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_umbrella"
-                    android:layout_marginEnd="12dp"
-                    app:tint="@color/colorPrimary" />
+        </LinearLayout>
 
-                <SearchView
-                    android:id="@+id/searchView"
-                    android:layout_width="0dp"
+        <!-- Wochennavigation -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp">
+
+            <ImageButton
+                android:id="@+id/buttonVorigeWoche"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_previous"
+                android:importantForAccessibility="no"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/colorOnSurface" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/textViewWochendatum"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:iconifiedByDefault="false"
-                    android:queryHint="@string/hint_suche" />
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="@color/colorOnSurface" />
 
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/textViewKalenderwoche"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorTextSecondary" />
 
-            <!-- Wochennavigation -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="4dp"
-                android:paddingEnd="4dp">
-
-                <ImageButton
-                    android:id="@+id/buttonVorigeWoche"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@android:drawable/ic_media_previous"
-                    android:importantForAccessibility="no"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/colorOnSurface" />
-
+                <!-- Aktuelle Woche + Drucken nebeneinander -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                    android:orientation="horizontal"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="4dp">
 
-                    <TextView
-                        android:id="@+id/textViewWochendatum"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="15sp"
-                        android:textColor="@color/colorOnSurface" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAktuelleWoche"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:text="@string/button_aktuelle_woche"
+                        android:textSize="11sp"
+                        android:textColor="@color/colorPrimary"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="@color/colorPrimary" />
 
-                    <TextView
-                        android:id="@+id/textViewKalenderwoche"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@color/colorTextSecondary" />
-
-                    <!-- Aktuelle Woche + Drucken nebeneinander ── -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginTop="4dp">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/buttonAktuelleWoche"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:text="@string/button_aktuelle_woche"
-                            android:textSize="11sp"
-                            android:textColor="@color/colorPrimary"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            app:strokeColor="@color/colorPrimary" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/buttonDrucken"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/button_drucken"
-                            android:textSize="11sp"
-                            android:textColor="@color/colorPrimary"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            app:strokeColor="@color/colorPrimary" />
-
-                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDrucken"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/button_drucken"
+                        android:textSize="11sp"
+                        android:textColor="@color/colorPrimary"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        app:strokeColor="@color/colorPrimary" />
 
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/buttonNaechsteWoche"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@android:drawable/ic_media_next"
-                    android:importantForAccessibility="no"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/colorOnSurface" />
-
             </LinearLayout>
 
-            <!-- Ansicht-Toggle -->
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleAnsicht"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="8dp"
-                app:singleSelection="true"
-                app:selectionRequired="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonWochenansicht"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:text="@string/ansicht_woche"
-                    android:textSize="13sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonMonatsansicht"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:text="@string/ansicht_monat"
-                    android:textSize="13sp"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
-
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+            <ImageButton
+                android:id="@+id/buttonNaechsteWoche"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_media_next"
+                android:importantForAccessibility="no"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/colorOnSurface" />
 
         </LinearLayout>
 
-        <!-- Wochentagsheader für Monatsansicht -->
-        <LinearLayout
-            android:id="@+id/layoutWochentagHeader"
+        <!-- Ansicht-Toggle -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleAnsicht"
             android:layout_width="match_parent"
-            android:layout_height="36dp"
-            android:orientation="horizontal"
-            android:background="@color/colorSurfaceVariant"
-            android:visibility="gone">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_mo" android:textStyle="bold"
-                android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_di" android:textStyle="bold"
-                android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_mi" android:textStyle="bold"
-                android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_do" android:textStyle="bold"
-                android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_fr" android:textStyle="bold"
-                android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_sa" android:textStyle="bold"
-                android:textColor="@color/colorPrimary" android:textSize="12sp"/>
-            <TextView android:layout_width="0dp" android:layout_height="match_parent"
-                android:layout_weight="1" android:gravity="center"
-                android:text="@string/wochentag_so" android:textStyle="bold"
-                android:textColor="@color/colorPrimary" android:textSize="12sp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonWochenansicht"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="@string/ansicht_woche"
+                android:textSize="13sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
 
-        </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonMonatsansicht"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="@string/ansicht_monat"
+                android:textSize="13sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
 
-        <!-- Einträge-Liste (Wochenansicht) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewEintraege"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="8dp" />
-
-        <!-- Kalender-Grid (Monatsansicht) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewKalender"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="4dp"
-            android:visibility="gone" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
     </LinearLayout>
 
-    <!-- FAB Baustellen links -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabBaustellen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_location" />
+    <!-- Wochentagsheader für Monatsansicht -->
+    <LinearLayout
+        android:id="@+id/layoutWochentagHeader"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:background="@color/colorSurfaceVariant"
+        android:visibility="gone">
 
-    <!-- FAB Neuer Eintrag rechts -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNeuerEintrag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:importantForAccessibility="no"
-        android:src="@android:drawable/ic_input_add" />
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_mo" android:textStyle="bold"
+            android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_di" android:textStyle="bold"
+            android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_mi" android:textStyle="bold"
+            android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_do" android:textStyle="bold"
+            android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_fr" android:textStyle="bold"
+            android:textColor="@color/colorTextSecondary" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_sa" android:textStyle="bold"
+            android:textColor="@color/colorPrimary" android:textSize="12sp"/>
+        <TextView android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:gravity="center"
+            android:text="@string/wochentag_so" android:textStyle="bold"
+            android:textColor="@color/colorPrimary" android:textSize="12sp"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </LinearLayout>
+
+    <!-- Einträge-Liste (Wochenansicht) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewEintraege"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp" />
+
+    <!-- Kalender-Grid (Monatsansicht) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewKalender"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="4dp"
+        android:visibility="gone" />
+
+    <!-- Bottom-Bar mit FABs -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:background="@color/colorBackground">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabBaustellen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_location" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabNeuerEintrag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no"
+            android:src="@android:drawable/ic_input_add" />
+
+    </LinearLayout>
+
+</LinearLayout>
