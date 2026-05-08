@@ -23,7 +23,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.nicohoffmann.auftragserfassung.database.AppDatabase;
 import com.nicohoffmann.auftragserfassung.model.Baustelle;
 import com.nicohoffmann.auftragserfassung.model.Eintrag;
-import com.nicohoffmann.auftragserfassung.util.WeeklyPdfGenerator;
+import com.nicohoffmann.auftragserfassung.util.PdfGenerator;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ── NEU: Print Button ──
         Button buttonDrucken = findViewById(R.id.buttonDrucken);
-        buttonDrucken.setOnClickListener(v -> generiereWochenPdf());
+        buttonDrucken.setOnClickListener(v -> zeigeDruckAuswahl());
 
         MaterialButtonToggleGroup toggleAnsicht = findViewById(R.id.toggleAnsicht);
         toggleAnsicht.check(R.id.buttonWochenansicht);
@@ -179,42 +179,99 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ====================================
-    // PDF Methods
-    // ====================================
+// PDF Auswahl-Dialog
+// ====================================
 
-    private void generiereWochenPdf() {
-        Map<String, List<String>> wochenEintraege = new HashMap<>();
-        String[] wochentage = {"Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"};
+    private void zeigeDruckAuswahl() {
+        String[] optionen = {"Aktuelle Woche", "Aktueller Monat", "Alles"};
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("PDF erstellen")
+                .setItems(optionen, (dialog, which) -> {
+                    switch (which) {
+                        case 0: generiereWochePdf(); break;
+                        case 1: generiereMonatsPdf(); break;
+                        case 2: generiereGesamtPdf();  break;
+                    }
+                })
+                .setNegativeButton("Abbrechen", null)
+                .show();
+    }
 
-        for (int i = 0; i < 7; i++) {
-            LocalDate tag = aktuellerMontag.plusDays(i);
-            String datum = tag.format(DB_DATUM_FORMAT);
-            String tagName = wochentage[i];
+    private void generiereWochePdf() {
+        List<PdfGenerator.DayEntry> eintraege = sammleWochenEintraege(aktuellerMontag);
+        java.util.Date wochenstart = java.sql.Date.valueOf(aktuellerMontag.toString());
+        startePdfExport(() -> new PdfGenerator(this).generateWeekPdf(wochenstart, eintraege),
+                "Wochenbericht");
+    }
 
-            List<String> eintragsTexte = alleEintraege.stream()
-                    .filter(e -> e.getDatum().equals(datum))
-                    .map(e -> findebaustellenName(e) + " – " + e.getBeschreibung())
-                    .collect(Collectors.toList());
-
-            wochenEintraege.put(tagName, eintragsTexte);
+    private void generiereMonatsPdf() {
+        List<PdfGenerator.DayEntry> eintraege = new ArrayList<>();
+        for (Eintrag e : alleEintraege) {
+            try {
+                LocalDate d = LocalDate.parse(e.getDatum(), DB_DATUM_FORMAT);
+                if (d.getYear() == aktuellerMonat.getYear()
+                        && d.getMonthValue() == aktuellerMonat.getMonthValue()) {
+                    eintraege.add(toDayEntry(e, d));
+                }
+            } catch (Exception ignored) {}
         }
+        int y = aktuellerMonat.getYear();
+        int m = aktuellerMonat.getMonthValue();
+        startePdfExport(() -> new PdfGenerator(this).generateMonthPdf(y, m, eintraege),
+                "Monatsbericht");
+    }
 
-        Date wochenstart = java.sql.Date.valueOf(aktuellerMontag.toString());
+    private void generiereGesamtPdf() {
+        List<PdfGenerator.DayEntry> eintraege = new ArrayList<>();
+        for (Eintrag e : alleEintraege) {
+            try {
+                LocalDate d = LocalDate.parse(e.getDatum(), DB_DATUM_FORMAT);
+                eintraege.add(toDayEntry(e, d));
+            } catch (Exception ignored) {}
+        }
+        startePdfExport(() -> new PdfGenerator(this).generateAllPdf(eintraege), "Gesamtbericht");
+    }
+
+    private List<PdfGenerator.DayEntry> sammleWochenEintraege(LocalDate montag) {
+        List<PdfGenerator.DayEntry> result = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate tag = montag.plusDays(i);
+            String datum = tag.format(DB_DATUM_FORMAT);
+            for (Eintrag e : alleEintraege) {
+                if (datum.equals(e.getDatum())) {
+                    result.add(toDayEntry(e, tag));
+                }
+            }
+        }
+        return result;
+    }
+
+    private PdfGenerator.DayEntry toDayEntry(Eintrag e, LocalDate tag) {
+        String baustelleName = findebaustellenName(e);
+        String tagName = tag.getDayOfWeek()
+                .getDisplayName(TextStyle.FULL, Locale.GERMAN);
+        return new PdfGenerator.DayEntry(
+                e.getDatum(),
+                tag.format(DATUM_FORMAT),
+                tagName,
+                e.getZeitVon(),
+                e.getZeitBis(),
+                e.getPauseMinuten(),
+                baustelleName,
+                e.getBeschreibung() != null ? e.getBeschreibung() : ""
+        );
+    }
+
+    private void startePdfExport(java.util.concurrent.Callable<java.io.File> task, String label) {
         try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-
             executor.execute(() -> {
                 try {
-                    WeeklyPdfGenerator generator = new WeeklyPdfGenerator(this);
-                    generator.generateWeeklyPdf(wochenstart, wochenEintraege);
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "PDF wurde in Downloads gespeichert ✓", Toast.LENGTH_LONG).show()
-                    );
-                } catch (Exception e) {
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Fehler: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                    );
-                } finally {
-                    executor.shutdown();
+                    task.call();
+                    runOnUiThread(() -> Toast.makeText(this,
+                            label + " in Downloads gespeichert ✓", Toast.LENGTH_LONG).show());
+                } catch (Exception ex) {
+                    runOnUiThread(() -> Toast.makeText(this,
+                            "Fehler: " + ex.getMessage(), Toast.LENGTH_LONG).show());
                 }
             });
         }
